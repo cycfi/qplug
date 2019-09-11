@@ -1,0 +1,6 @@
+[submodule "external/iPlug2"]
+	path = external/iPlug2
+	url = git@github.com:cycfi/iPlug2.git
+[submodule "external/VST3_SDK"]
+	path = external/VST3_SDK
+	url = git@github.com:steinbergmedia/vst3sdk.git
