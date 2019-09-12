@@ -14,6 +14,8 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
    add_compile_definitions(NDEBUG=1)
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+
 if (APPLE)
    find_library(AUDIOUNIT_LIBRARY AudioUnit REQUIRED)
    find_library(COREAUDIO_LIBRARY CoreAudio REQUIRED)

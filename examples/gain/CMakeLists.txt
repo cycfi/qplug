@@ -5,7 +5,7 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.5.1)
 
-set(PLUG_NAME "IPlugEffect")
+set(PLUG_NAME "gain")
 set(PLUG_MFR "Cycfi Research")
 set(PLUG_MFR_ID Cycf)
 set(PLUG_COPYRIGHT_STR "Copyright 2019 Cycfi Research Inc")

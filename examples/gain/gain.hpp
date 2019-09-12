@@ -13,12 +13,11 @@ enum EParams
 using namespace iplug;
 using namespace igraphics;
 
-class IPlugEffect : public Plugin
+class gain : public Plugin
 {
 public:
-  IPlugEffect(const InstanceInfo& info);
 
-#if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
-  void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
-#endif
+  gain(const InstanceInfo& info);
+
+  void   ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
 };

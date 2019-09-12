@@ -73,5 +73,4 @@ set(IPLUG2_INCLUDE_DIRS
    ${IPLUG2_ROOT}/IPlug/Extras
    ${IPLUG2_ROOT}/IPlug/VST3
    ${IPLUG2_ROOT}/WDL
-   ${IPLUG2_ROOT}/IPlug/IPlugEffect
 )

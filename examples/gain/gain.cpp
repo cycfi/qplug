@@ -1,13 +1,13 @@
 #include "gain.hpp"
 #include "IPlug_include_in_plug_src.h"
 
-IPlugEffect::IPlugEffect(const InstanceInfo& info)
+gain::gain(const InstanceInfo& info)
 : Plugin(info, MakeConfig(kNumParams, kNumPrograms))
 {
   GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
 }
 
-void IPlugEffect::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
+void gain::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
   const double gain = GetParam(kGain)->Value() / 100.;
   const int nChans = NOutChansConnected();
@@ -18,3 +18,6 @@ void IPlugEffect::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
     }
   }
 }
+
+
+
