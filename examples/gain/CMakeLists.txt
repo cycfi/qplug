@@ -5,11 +5,15 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.5.1)
 
-set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
-include(cmake/defaults.cmake)
+set(PLUG_NAME "IPlugEffect")
+set(PLUG_MFR "Cycfi Research")
+set(PLUG_MFR_ID Cycf)
+set(PLUG_COPYRIGHT_STR "Copyright 2019 Cycfi Research Inc")
+set(BUNDLE_MFR "CycfiInc")
 
-include(cmake/external.cmake)
-add_subdirectory(examples)
+set(PLUG_SOURCES
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain.cpp
+)
 
+include(${QPLUG_ROOT}/cmake/build_vst3.cmake)
 

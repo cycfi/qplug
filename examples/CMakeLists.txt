@@ -5,11 +5,7 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.5.1)
 
-set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
-include(cmake/defaults.cmake)
+add_subdirectory(gain)
 
-include(cmake/external.cmake)
-add_subdirectory(examples)
 
 

@@ -1,0 +1,59 @@
+/*=============================================================================
+   Copyright (c) 2019 Joel de Guzman
+
+   Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
+=============================================================================*/
+#pragma once
+
+#define PLUG_NAME "${PLUG_NAME}"
+#define PLUG_MFR "${PLUG_MFR}"
+#define PLUG_VERSION_HEX ${PLUG_VERSION_HEX}
+#define PLUG_VERSION_STR "${PLUG_VERSION_STR}"
+#define PLUG_UNIQUE_ID '${PLUG_UNIQUE_ID}'
+#define PLUG_MFR_ID '${PLUG_MFR_ID}'
+#define PLUG_URL_STR "${PLUG_URL_STR}"
+#define PLUG_EMAIL_STR "${PLUG_EMAIL_STR}"
+#define PLUG_COPYRIGHT_STR "${PLUG_COPYRIGHT_STR}"
+#define PLUG_CLASS_NAME ${PLUG_CLASS_NAME}
+
+#define BUNDLE_NAME "${BUNDLE_NAME}"
+#define BUNDLE_MFR "${BUNDLE_MFR}"
+#define BUNDLE_DOMAIN "${BUNDLE_DOMAIN}"
+
+#define PLUG_CHANNEL_IO "${PLUG_CHANNEL_IO}"
+
+#define PLUG_LATENCY ${PLUG_LATENCY}
+#define PLUG_TYPE ${PLUG_TYPE}
+#define PLUG_DOES_MIDI_IN ${PLUG_DOES_MIDI_IN}
+#define PLUG_DOES_MIDI_OUT ${PLUG_DOES_MIDI_OUT}
+#define PLUG_DOES_MPE ${PLUG_DOES_MPE}
+#define PLUG_DOES_STATE_CHUNKS ${PLUG_DOES_STATE_CHUNKS}
+#define PLUG_HAS_UI ${PLUG_HAS_UI}
+#define PLUG_WIDTH ${PLUG_WIDTH}
+#define PLUG_HEIGHT ${PLUG_HEIGHT}
+#define PLUG_FPS ${PLUG_FPS}
+#define PLUG_SHARED_RESOURCES ${PLUG_SHARED_RESOURCES}
+
+#define AUV2_ENTRY ${AUV2_ENTRY}
+#define AUV2_ENTRY_STR "${AUV2_ENTRY_STR}"
+#define AUV2_FACTORY ${AUV2_FACTORY}
+#define AUV2_VIEW_CLASS ${AUV2_VIEW_CLASS}
+#define AUV2_VIEW_CLASS_STR "${AUV2_VIEW_CLASS_STR}"
+
+#define AAX_TYPE_IDS ${AAX_TYPE_IDS}
+#define AAX_TYPE_IDS_AUDIOSUITE ${AAX_TYPE_IDS_AUDIOSUITE}
+#define AAX_PLUG_MFR_STR ${AAX_PLUG_MFR_STR}
+#define AAX_PLUG_NAME_STR "${AAX_PLUG_NAME_STR}"
+#define AAX_PLUG_CATEGORY_STR "${AAX_PLUG_CATEGORY_STR}"
+#define AAX_DOES_AUDIOSUITE ${AAX_DOES_AUDIOSUITE}
+
+#define VST3_SUBCATEGORY "${VST3_SUBCATEGORY}"
+
+#define APP_NUM_CHANNELS ${APP_NUM_CHANNELS}
+#define APP_N_VECTOR_WAIT ${APP_N_VECTOR_WAIT}
+#define APP_MULT ${APP_MULT}
+#define APP_COPY_AUV3 ${APP_COPY_AUV3}
+#define APP_RESIZABLE ${APP_RESIZABLE}
+#define APP_SIGNAL_VECTOR_SIZE ${APP_SIGNAL_VECTOR_SIZE}
+
+#define ROBOTO_FN "Roboto-Regular.ttf"
