@@ -10,9 +10,19 @@ set(PLUG_MFR "Cycfi Research")
 set(PLUG_MFR_ID Cycf)
 set(PLUG_COPYRIGHT_STR "Copyright 2019 Cycfi Research Inc")
 set(BUNDLE_MFR "CycfiInc")
+set(PLUG_WIDTH 160)
+set(PLUG_HEIGHT 140)
 
 set(PLUG_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/gain.cpp
+)
+
+set(PLUG_HEADERS
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain.hpp
+)
+
+set(PLUG_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 include(${QPLUG_ROOT}/cmake/build_vst3.cmake)
