@@ -2,6 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>description</key>
+			<string>${PLUG_DESCRIPTION}</string>
+			<key>factoryFunction</key>
+			<string>${AUV2_FACTORY}</string>
+			<key>manufacturer</key>
+			<string>${PLUG_MFR_ID}</string>
+			<key>name</key>
+			<string>${PLUG_MFR}: ${PLUG_DESCRIPTION}</string>
+			<key>sandboxSafe</key>
+			<true/>
+			<key>subtype</key>
+			<string>${AUV2_SUBTYPE}</string>
+			<key>type</key>
+			<string>${AUV2_TYPE}</string>
+			<key>version</key>
+			<integer>65536</integer>
+		</dict>
+	</array>
+	<key>AudioUnit Version</key>
+	<string>${PLUG_VERSION_HEX}</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
@@ -9,11 +32,11 @@
 	<key>CFBundleGetInfoString</key>
 	<string>${PLUG_NAME} ${PLUG_VERSION_STR} ${PLUG_COPYRIGHT_STR}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.${PLUG_MFR}.vst3.${PLUG_NAME}</string>
+	<string>com.${BUNDLE_MFR}.audiounit.${PLUG_NAME}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>${BUNDLE_NAME}</string>
+	<string>${PLUG_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,5 +49,7 @@
 	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.11.0</string>
+	<key>NSPrincipalClass</key>
+	<string>${AUV2_VIEW_CLASS}</string>
 </dict>
 </plist>

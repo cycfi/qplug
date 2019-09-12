@@ -9,9 +9,16 @@ set(PLUG_NAME "gain")
 set(PLUG_MFR "Cycfi Research")
 set(PLUG_MFR_ID Cycf)
 set(PLUG_COPYRIGHT_STR "Copyright 2019 Cycfi Research Inc")
+set(PLUG_DESCRIPTION "Gain Effects Example")
 set(BUNDLE_MFR "CycfiInc")
 set(PLUG_WIDTH 160)
 set(PLUG_HEIGHT 140)
+
+set(PLUG_WIDTH 350)
+set(PLUG_HEIGHT 300)
+
+set(AUV2_TYPE "aufx")
+set(AUV2_SUBTYPE "gain")
 
 set(PLUG_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/gain.cpp
@@ -26,4 +33,5 @@ set(PLUG_INCLUDE_DIRECTORIES
 )
 
 include(${QPLUG_ROOT}/cmake/build_vst3.cmake)
+include(${QPLUG_ROOT}/cmake/build_au.cmake)
 

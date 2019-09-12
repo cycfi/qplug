@@ -5,7 +5,6 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.5.1)
 
-set(PLUG_CLASS_NAME ${PLUG_NAME})
 set(BUNDLE_NAME "${PLUG_NAME}")
 set(SHARED_RESOURCES_SUBPATH "${PLUG_NAME}")
 set(AUV2_ENTRY ${PLUG_NAME}_Entry)

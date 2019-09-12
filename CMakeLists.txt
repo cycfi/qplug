@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ###############################################################################
 # elements
+
 set(ELEMENTS_NO_EXAMPLES YES)
 
 if (NOT DEFINED ELEMENTS_ROOT)
@@ -19,10 +20,30 @@ endif()
 add_subdirectory(${ELEMENTS_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/elements")
 
 ###############################################################################
+# Q
+
+if (NOT DEFINED Q_ROOT)
+  set(Q_ROOT ${CMAKE_CURRENT_LIST_DIR}/../q)
+endif()
+
+add_subdirectory(${Q_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/q")
+
+###############################################################################
 # qplug
+
 set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
 include(cmake/defaults.cmake)
+
+set (QPLUG_SOURCES
+   ${QPLUG_ROOT}/lib/src/processor.cpp
+   ${QPLUG_ROOT}/lib/src/controller.cpp
+   ${QPLUG_ROOT}/lib/src/iplug2/iplug2_plugin.cpp
+)
+
+set (QPLUG_INCLUDE_DIRS
+   ${QPLUG_ROOT}/lib/include
+)
 
 include(cmake/external.cmake)
 add_subdirectory(examples)

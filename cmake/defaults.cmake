@@ -13,9 +13,13 @@ set(PLUG_MFR_ID Acme)
 set(PLUG_URL_STR "https://www/cycfi.com")
 set(PLUG_EMAIL_STR "spam@me.com")
 set(PLUG_COPYRIGHT_STR "Copyright 2019 Acme Inc")
+set(PLUG_DESCRIPTION "Super Cool Plugin")
 
 set(BUNDLE_MFR "AcmeInc")
 set(BUNDLE_DOMAIN "com")
+
+set(AUV2_TYPE "aufx")
+set(AUV2_SUBTYPE ${PLUG_UNIQUE_ID})
 
 set(PLUG_CHANNEL_IO "2-2")
 

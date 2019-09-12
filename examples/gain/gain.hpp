@@ -1,35 +1,36 @@
+/*=============================================================================
+   Copyright (c) 2019 Joel de Guzman
+
+   Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
+=============================================================================*/
 #pragma once
 
-#include "IPlug_include_in_plug_hdr.h"
-#include <memory>
+#include <qplug/controller.hpp>
+#include <qplug/processor.hpp>
 #include <elements.hpp>
+#include <memory>
 
-const int kNumPrograms = 1;
+namespace elements = cycfi::elements;
+namespace qplug = cycfi::qplug;
 
-enum EParams
-{
-   kGain = 0,
-   kNumParams
-};
+using dial_ptr = std::shared_ptr<elements::dial_base>;
 
-using namespace iplug;
-using namespace igraphics;
-
-class gain : public Plugin
+class gain_controller : public qplug::controller
 {
 public:
+                        gain_controller(base_controller& base);
 
-   gain(const InstanceInfo& info);
-
-   void     ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
-   void*    OpenWindow(void* pParent) override;
-   void     CloseWindow() override;
+      void              on_attach_view() override;
+      parameter_list    parameters() override;
 
 private:
 
-   using view = cycfi::elements::view;
-   using dial_ptr = std::shared_ptr<cycfi::elements::dial_base>;
-
-   dial_ptr _dial;
-   std::unique_ptr<view> _view;
+   dial_ptr             _dial;
 };
+
+class gain_processor : public qplug::processor
+{
+public:
+                        gain_processor(base_processor& base);
+};
+

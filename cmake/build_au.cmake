@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(target ${PLUG_NAME}_vst3_plugin)
+set(target ${PLUG_NAME}_au_plugin)
 include(${QPLUG_ROOT}/cmake/derived.cmake)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -40,6 +40,7 @@ set(QPLUG_RESOURCES
 if (APPLE)
    find_library(AUDIOUNIT_LIBRARY AudioUnit REQUIRED)
    find_library(COREAUDIO_LIBRARY CoreAudio REQUIRED)
+   find_library(COREMIDI_LIBRARY CoreMIDI REQUIRED)
    find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
    find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
    find_library(ACCELERATE_LIBRARY Accelerate REQUIRED)
@@ -50,6 +51,7 @@ if (APPLE)
    set(QPLUG_DEPENDENCIES
       ${QPLUG_DEPENDENCIES}
       ${COREAUDIO_LIBRARY}
+      ${COREMIDI_LIBRARY}
       ${COREFOUNDATION_LIBRARY}
       ${FOUNDATION_LIBRARY}
       ${AUDIOUNIT_LIBRARY}
@@ -65,7 +67,7 @@ endif()
 add_library(${target} MODULE
    ${PLUG_SOURCES}
    ${QPLUG_SOURCES}
-   ${VST3_SOURCES}
+   ${AU_SOURCES}
    ${IPLUG2_LIB_SOURCES}
    ${QPLUG_RESOURCES}
 )
@@ -73,7 +75,7 @@ add_library(${target} MODULE
 target_compile_definitions(${target}
    PUBLIC
    IPLUG2=1
-   VST3_API=1
+   AU_API=1
    NO_IGRAPHICS=1
    IPLUG_DSP=1
    SAMPLE_TYPE_FLOAT=1
@@ -86,10 +88,9 @@ set_source_files_properties(
 target_include_directories(${target}
    PUBLIC
    ${PLUG_INCLUDE_DIRECTORIES}
-   ${VST3_ROOT}
    ${IPLUG2_INCLUDE_DIRS}
    ${QPLUG_INCLUDE_DIRS}
-   ${VST3_INCLUDE_DIRS}
+   ${AU_INCLUDE_DIRS}
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -108,25 +109,16 @@ if (APPLE)
    set_target_properties(${target}
       PROPERTIES
       BUNDLE true
-      BUNDLE_EXTENSION "vst3"
+      BUNDLE_EXTENSION "component"
       OUTPUT_NAME "${PLUG_NAME}"
-      MACOSX_BUNDLE_INFO_PLIST "${QPLUG_ROOT}/cmake/vst3.plist.in"
+      MACOSX_BUNDLE_INFO_PLIST "${QPLUG_ROOT}/cmake/au.plist.in"
    )
 
-   add_custom_command(
-      TARGET ${target}
-      POST_BUILD
-      COMMAND "${QPLUG_TOOLS}/macos/validator" "$<TARGET_BUNDLE_DIR:${target}>"
-   )
-
-   add_custom_command(
-      TARGET ${target}
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_BUNDLE_DIR:${target}> ~/Library/Audio/Plug-ins/VST3/${PLUG_NAME}.vst3
-   )
+   #add_custom_command(
+   #   TARGET ${target}
+   #   POST_BUILD
+   #   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_BUNDLE_DIR:${target}> ~/Library/Audio/Plug-ins/VST3/${PLUG_NAME}.vst3
+   #)
 endif()
-
-
-
 
 

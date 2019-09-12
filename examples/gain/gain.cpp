@@ -1,8 +1,24 @@
-#include "gain.hpp"
-#include "IPlug_include_in_plug_src.h"
+/*=============================================================================
+   Copyright (c) 2019 Joel de Guzman
 
-using namespace cycfi::elements;
-using dial_ptr = std::shared_ptr<dial_base>;
+   Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
+=============================================================================*/
+#include "gain.hpp"
+
+namespace cycfi { namespace qplug
+{
+   controller_ptr make_controller(base_controller& base)
+   {
+      return std::make_unique<gain_controller>(base);
+   }
+
+   processor_ptr make_processor(base_processor& base)
+   {
+      return std::make_unique<gain_processor>(base);
+   }
+}}
+
+using namespace elements;
 auto constexpr bkd_color = rgba(35, 35, 37, 255);
 
 struct background : element
@@ -18,18 +34,18 @@ struct background : element
 auto make_dial(dial_ptr& dial_)
 {
    dial_ = share(
-      dial(radial_marks<20>(basic_knob<50>()))
+      dial(radial_marks<20>(basic_knob<65>()))
    );
 
-   auto markers = radial_labels<15>(
+   auto markers = radial_labels<20>(
       hold(dial_),
-      0.7,                                   // Label font size (relative size)
+      0.9,                                   // Label font size (relative size)
       "0", "1", "2", "3", "4",               // Labels
       "5", "6", "7", "8", "9", "10"
    );
 
    return align_center_middle(
-      caption(markers, "Volume", 0.8)
+      caption(markers, "Volume", 0.9)
    );
 }
 
@@ -40,50 +56,39 @@ auto make_controls(dial_ptr& dial_)
    );
 }
 
-gain::gain(const InstanceInfo& info)
-  : Plugin(info, MakeConfig(kNumParams, kNumPrograms))
-{
-    GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
-}
+gain_controller::gain_controller(base_controller& base)
+ : qplug::controller(base)
+{}
 
-void gain::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
-{
-   const double gain = GetParam(kGain)->Value() / 100.;
-   const int nChans = NOutChansConnected();
+using parameter = qplug::parameter;
+using parameter_list = gain_controller::parameter_list;
 
-   for (int s = 0; s < nFrames; s++)
+parameter_list gain_controller::parameters()
+{
+   static parameter params[] =
    {
-      for (int c = 0; c < nChans; c++)
-      {
-         outputs[c][s] = inputs[c][s] * gain;
-      }
-   }
+      parameter{ "Gain", 100.0 }.range(0, 100).unit("%")
+   };
+
+   return { params };
 }
 
-void* gain::OpenWindow(void* pParent)
+void gain_controller::on_attach_view()
 {
-   _view = std::make_unique<view>(static_cast<cycfi::elements::host_view_handle>(pParent));
-
-   _view->content(
+   view()->content(
       {
          share(make_controls(_dial)),
          share(background{})
       }
    );
 
-   _dial->on_change =
-      [&](double val)
-      {
-         SendParameterValueFromUI(kGain, val);
-      };
-
-  return _view->host();
+   controls(_dial);
 }
 
-void gain::CloseWindow()
-{
-   _view = nullptr;
-}
+gain_processor::gain_processor(base_processor& base)
+ : qplug::processor(base)
+{}
+
 
 
 

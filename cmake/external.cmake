@@ -12,9 +12,11 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
    add_compile_definitions(NDEBUG=1)
 endif()
 
+set(VST3_ROOT ${QPLUG_ROOT}/external/VST3_SDK)
+set(IPLUG2_ROOT ${QPLUG_ROOT}/external/iPlug2)
+
 ###############################################################################
 # VST3
-set(VST3_ROOT ${QPLUG_ROOT}/external/VST3_SDK)
 
 set(VST3_SOURCES
    ${VST3_ROOT}/base/source/baseiids.cpp
@@ -48,14 +50,36 @@ set(VST3_SOURCES
    ${VST3_ROOT}/public.sdk/source/vst/vstpresetfile.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstrepresentation.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstsinglecomponenteffect.cpp
+   ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3.cpp
+   ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3_ProcessorBase.cpp
 )
 
-set(VST3_INCLUDE_DIRS ${VST3_ROOT})
+set(
+   VST3_INCLUDE_DIRS ${VST3_ROOT}
+   ${IPLUG2_ROOT}/IPlug/VST3
+)
+
+###############################################################################
+# AU
+
+set(AU_SOURCES
+   ${IPLUG2_ROOT}/IPlug/AUv2/IPlugAU.cpp
+   ${IPLUG2_ROOT}/IPlug/AUv2/IPlugAU_view_factory.mm
+   ${IPLUG2_ROOT}/IPlug/AUv2/dfx-au-utilities.c
+   ${IPLUG2_ROOT}/IPlug/IPlugAPIBase.cpp
+   ${IPLUG2_ROOT}/IPlug/IPlugParameter.cpp
+   ${IPLUG2_ROOT}/IPlug/IPlugPaths.mm
+   ${IPLUG2_ROOT}/IPlug/IPlugPluginBase.cpp
+   ${IPLUG2_ROOT}/IPlug/IPlugProcessor.cpp
+   ${IPLUG2_ROOT}/IPlug/IPlugTimer.cpp
+)
+
+set(AU_INCLUDE_DIRS
+   ${IPLUG2_ROOT}/IPlug/AUv2
+)
 
 ###############################################################################
 # IPlug2
-
-set(IPLUG2_ROOT ${QPLUG_ROOT}/external/iPlug2)
 
 set(IPLUG2_LIB_SOURCES
    ${IPLUG2_ROOT}/IPlug/IPlugAPIBase.cpp
@@ -64,13 +88,13 @@ set(IPLUG2_LIB_SOURCES
    ${IPLUG2_ROOT}/IPlug/IPlugPluginBase.cpp
    ${IPLUG2_ROOT}/IPlug/IPlugProcessor.cpp
    ${IPLUG2_ROOT}/IPlug/IPlugTimer.cpp
-   ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3.cpp
-   ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3_ProcessorBase.cpp
 )
 
 set(IPLUG2_INCLUDE_DIRS
    ${IPLUG2_ROOT}/IPlug
    ${IPLUG2_ROOT}/IPlug/Extras
-   ${IPLUG2_ROOT}/IPlug/VST3
    ${IPLUG2_ROOT}/WDL
 )
+
+
+
