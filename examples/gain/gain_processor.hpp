@@ -16,6 +16,8 @@ class gain_processor : public qplug::processor
 {
 public:
                         gain_processor(base_processor& base);
+
+   virtual void         reset();
    virtual void         process(in_channels const& in, out_channels const& out);
 
 private:

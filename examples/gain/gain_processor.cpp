@@ -14,6 +14,11 @@ gain_processor::gain_processor(base_processor& base)
    parameters(_gain);
 }
 
+void gain_processor::reset()
+{
+   _gain_lp.cutoff(4_Hz, sps());
+}
+
 void gain_processor::process(in_channels const& in, out_channels const& out)
 {
    auto l_in = in[0];
@@ -28,8 +33,4 @@ void gain_processor::process(in_channels const& in, out_channels const& out)
       r_out[i] = r_in[i] * _gain_lp();
    }
 }
-
-
-
-
 
