@@ -28,9 +28,9 @@ void gain_processor::process(in_channels const& in, out_channels const& out)
 
    for (auto i : out.frames())
    {
-      _gain_lp(_gain / 100);
-      l_out[i] = l_in[i] * _gain_lp();
-      r_out[i] = r_in[i] * _gain_lp();
+      auto g = _gain_lp(_gain / 100);
+      l_out[i] = l_in[i] * g;
+      r_out[i] = r_in[i] * g;
    }
 }
 
