@@ -65,16 +65,34 @@ namespace cycfi { namespace qplug
    ////////////////////////////////////////////////////////////////////////////
    namespace detail
    {
+      template <typename FD, typename F>
+      void assign_callback(FD& dest, F&& f)
+      {
+         if (!dest)
+         {
+            dest = std::forward<F>(f);
+         }
+         else
+         {
+            dest = [f1=dest, f2=f](double val)
+            {
+               // Chain the calls
+               f1(val);
+               f2(val);
+            };
+         }
+      }
+
       template <typename Element, typename F>
       void set_callback(Element& e, F&& f)
       {
-         e.on_change = std::forward<F>(f);
+         assign_callback(e.on_change, std::forward<F>(f));
       }
 
       template <typename F>
       void set_callback(elements::basic_button& e, F&& f)
       {
-         e.on_click = std::forward<F>(f);
+         assign_callback(e.on_click, std::forward<F>(f));
       }
    }
 
