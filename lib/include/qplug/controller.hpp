@@ -47,16 +47,14 @@ namespace cycfi { namespace qplug
       void                    edit_parameter(int id, double value);
       void                    parameter_change(int id, double value);
 
-                              template <typename T>
-      void                    add_controller(int id, T& control);
-
                               template <typename T, typename... Rest>
       void                    add_controller(int id, T& first, Rest&... rest);
 
-      using ui_change = std::function<void(double)>;
+      using param_change = std::function<void(double)>;
+      using param_change_list = std::vector<param_change>;
 
       base_controller&        _base;
-      std::vector<ui_change>  _on_parameter_change;
+      param_change_list       _on_parameter_change;
    };
 
    using controller_ptr = std::unique_ptr<controller>;
@@ -80,8 +78,8 @@ namespace cycfi { namespace qplug
       }
    }
 
-   template <typename T>
-   inline void controller::add_controller(int id, T& control)
+   template <typename T, typename... Rest>
+   inline void controller::add_controller(int id, T& control, Rest&... rest)
    {
       detail::set_callback(*control,
          [this, id](auto val)
@@ -91,7 +89,7 @@ namespace cycfi { namespace qplug
       );
 
       auto const& param = parameters()[id];
-      ui_change f;
+      param_change f;
       switch (param._type)
       {
          case parameter::bool_:
@@ -117,13 +115,9 @@ namespace cycfi { namespace qplug
             break;
       }
       _on_parameter_change.push_back(f);
-   }
 
-   template <typename T, typename... Rest>
-   inline void controller::add_controller(int id, T& first, Rest&... rest)
-   {
-      add_controller(id, first);
-      add_controller(id+1, rest...);
+      if constexpr(sizeof...(rest))
+         add_controller(id+1, rest...);
    }
 
    template <typename... T>

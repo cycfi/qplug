@@ -64,6 +64,16 @@ if (APPLE)
    )
 endif()
 
+configure_file(
+   ${QPLUG_ROOT}/cmake/factory.cpp.in
+   factory.cpp
+)
+
+set (QPLUG_SOURCES
+   ${QPLUG_SOURCES}
+   ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp
+)
+
 add_library(${target} MODULE
    ${PLUG_SOURCES}
    ${QPLUG_SOURCES}

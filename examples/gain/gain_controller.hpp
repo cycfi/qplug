@@ -6,15 +6,13 @@
 #pragma once
 
 #include <qplug/controller.hpp>
-#include <qplug/processor.hpp>
 #include <elements.hpp>
-#include <memory>
 
 namespace elements = cycfi::elements;
 namespace qplug = cycfi::qplug;
-
 using dial_ptr = std::shared_ptr<elements::dial_base>;
 
+///////////////////////////////////////////////////////////////////////////////
 class gain_controller : public qplug::controller
 {
 public:
@@ -28,9 +26,4 @@ private:
    dial_ptr             _dial;
 };
 
-class gain_processor : public qplug::processor
-{
-public:
-                        gain_processor(base_processor& base);
-};
 

@@ -82,11 +82,30 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
    using Shape = iplug::IParam::Shape;
    using ShapeLinear = iplug::IParam::ShapeLinear;
    using ShapePowCurve = iplug::IParam::ShapePowCurve;
+   int flags = param._can_automate? 0 : kFlagCannotAutomate;
 
    switch (param._type)
    {
       case qplug::parameter::bool_:
+         GetParam(id)->InitBool(
+            param._name
+          , param._init > 0.5
+          , param._unit
+          , flags          // flags
+          , ""             // group
+         );
+         break;
+
       case qplug::parameter::int_:
+         GetParam(id)->InitInt(
+            param._name
+          , param._init
+          , param._min
+          , param._max
+          , param._unit
+          , flags          // flags
+          , ""             // group
+         );
          break;
 
       case qplug::parameter::double_:
@@ -97,7 +116,6 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
             std::forward<Shape>(linear) :
             std::forward<Shape>(power);
 
-         int flags = param._can_automate? 0 : kFlagCannotAutomate;
          GetParam(id)->InitDouble(
             param._name
           , param._init
@@ -105,7 +123,7 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
           , param._max
           , param._step
           , param._unit
-          , 0              // flags
+          , flags          // flags
           , ""             // group
           , shape          // shape
           , kUnitCustom    // unit
@@ -125,5 +143,6 @@ void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
 {
    if (source != kUI && _view)
       _controller->parameter_change(id, GetParam(id)->GetNormalized());
+   _processor->parameter_change(id, GetParam(id)->Value());
 }
 

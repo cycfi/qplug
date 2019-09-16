@@ -1,0 +1,21 @@
+/*=============================================================================
+   Copyright (c) 2019 Joel de Guzman
+
+   Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
+=============================================================================*/
+#include "${PLUG_NAME}_controller.hpp"
+#include "${PLUG_NAME}_processor.hpp"
+
+namespace cycfi { namespace qplug
+{
+   controller_ptr make_controller(base_controller& base)
+   {
+      return std::make_unique<${PLUG_NAME}_controller>(base);
+   }
+
+   processor_ptr make_processor(base_processor& base)
+   {
+      return std::make_unique<${PLUG_NAME}_processor>(base);
+   }
+}}
+

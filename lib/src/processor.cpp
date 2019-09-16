@@ -20,4 +20,9 @@ namespace cycfi { namespace qplug
    {
       return _base.GetBypassed();
    }
+
+   void processor::parameter_change(int id, double value)
+   {
+      _on_parameter_change[id](value);
+   }
 }}

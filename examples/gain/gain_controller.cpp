@@ -3,20 +3,7 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#include "gain.hpp"
-
-namespace cycfi { namespace qplug
-{
-   controller_ptr make_controller(base_controller& base)
-   {
-      return std::make_unique<gain_controller>(base);
-   }
-
-   processor_ptr make_processor(base_processor& base)
-   {
-      return std::make_unique<gain_processor>(base);
-   }
-}}
+#include "gain_controller.hpp"
 
 using namespace elements;
 auto constexpr bkd_color = rgba(35, 35, 37, 255);
@@ -85,9 +72,6 @@ void gain_controller::on_attach_view()
    controls(_dial);
 }
 
-gain_processor::gain_processor(base_processor& base)
- : qplug::processor(base)
-{}
 
 
 

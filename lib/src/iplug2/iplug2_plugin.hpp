@@ -44,6 +44,7 @@ public:
 
    elements::view*         view() const { return _view.get(); }
    void                    edit_parameter(int id, double value);
+   double                  parameter(int id);
 
 private:
 

@@ -21,11 +21,13 @@ set(AUV2_TYPE "aufx")
 set(AUV2_SUBTYPE "gain")
 
 set(PLUG_SOURCES
-   ${CMAKE_CURRENT_SOURCE_DIR}/gain.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain_controller.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain_processor.cpp
 )
 
 set(PLUG_HEADERS
-   ${CMAKE_CURRENT_SOURCE_DIR}/gain.hpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain_controller.hpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/gain_processor.hpp
 )
 
 set(PLUG_INCLUDE_DIRECTORIES
