@@ -60,6 +60,16 @@ namespace cycfi { namespace qplug
    using controller_ptr = std::unique_ptr<controller>;
    controller_ptr make_controller(base_controller& base);
 
+   template <typename ElementPtr>
+   struct virtual_controller
+    : std::enable_shared_from_this<virtual_controller<ElementPtr>>
+   {
+      virtual void   set_on_change(std::function<void(double)> const& f) = 0;
+      virtual void   value(double val) = 0;
+
+      ElementPtr     element;
+   };
+
    ////////////////////////////////////////////////////////////////////////////
    // Inline implementation
    ////////////////////////////////////////////////////////////////////////////
@@ -94,6 +104,24 @@ namespace cycfi { namespace qplug
       {
          assign_callback(e.on_click, std::forward<F>(f));
       }
+
+      template <typename ElementPtr, typename F>
+      void set_callback(virtual_controller<ElementPtr>& e, F&& f)
+      {
+         e.set_on_change(std::forward<F>(f));
+      }
+
+      template <typename Element>
+      void refresh_element(Element& e, elements::view& view_)
+      {
+         view_.refresh(e);
+      }
+
+      template <typename ElementPtr>
+      void refresh_element(elements::view& view_, virtual_controller<ElementPtr>& e)
+      {
+         view_.refresh(*e->element);
+      }
    }
 
    template <typename T, typename... Rest>
@@ -114,21 +142,23 @@ namespace cycfi { namespace qplug
             f = [this, control](double value)
             {
                control->value(bool(value));
-               view()->refresh(*control);
+               refresh_element(view(), *control);
             };
             break;
+
          case parameter::int_:
             f = [this, control](double value)
             {
                control->value(int(value));
-               view()->refresh(*control);
+               refresh_element(view(), *control);
             };
             break;
+
          case parameter::double_:
             f = [this, control](double value)
             {
                control->value(value);
-               view()->refresh(*control);
+               refresh_element(view(), *control);
             };
             break;
       }
