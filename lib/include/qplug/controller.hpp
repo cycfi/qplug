@@ -141,7 +141,7 @@ namespace cycfi { namespace qplug
          case parameter::bool_:
             f = [this, control](double value)
             {
-               control->value(bool(value));
+               control->value(value > 0.5);
                refresh_element(view(), *control);
             };
             break;
