@@ -26,6 +26,8 @@ if (NOT DEFINED Q_ROOT)
   set(Q_ROOT ${CMAKE_CURRENT_LIST_DIR}/../q)
 endif()
 
+set(Q_NO_EXAMPLES YES)
+
 add_subdirectory(${Q_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/q")
 
 ###############################################################################
@@ -33,7 +35,7 @@ add_subdirectory(${Q_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/q")
 
 set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
-include(cmake/defaults.cmake)
+include(${QPLUG_ROOT}/cmake/defaults.cmake)
 
 set (QPLUG_SOURCES
    ${QPLUG_ROOT}/lib/src/processor.cpp
@@ -45,7 +47,7 @@ set (QPLUG_INCLUDE_DIRS
    ${QPLUG_ROOT}/lib/include
 )
 
-include(cmake/external.cmake)
+include(${QPLUG_ROOT}/cmake/external.cmake)
 add_subdirectory(examples)
 
 
