@@ -23,6 +23,7 @@ namespace cycfi { namespace qplug
 
    void controller::parameter_change(int id, double value)
    {
-      _on_parameter_change[id](value);
+      if (id < _on_parameter_change.size())
+         _on_parameter_change[id](value);
    }
 }}
