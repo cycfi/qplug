@@ -123,10 +123,11 @@ if (APPLE)
       MACOSX_BUNDLE_INFO_PLIST "${QPLUG_ROOT}/cmake/vst3.plist.in"
    )
 
-   add_custom_command(
-      TARGET ${target}
-      POST_BUILD
+   add_custom_target(
+      ${target}_test
       COMMAND "${QPLUG_TOOLS}/macos/validator" "$<TARGET_BUNDLE_DIR:${target}>"
+      DEPENDS ${target}
+      VERBATIM
    )
 
    add_custom_command(
