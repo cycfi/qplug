@@ -32,8 +32,8 @@ namespace cycfi { namespace qplug
        : _name(name)
        , _type(std::is_same<T, bool>::value ? bool_ : int_)
        , _init(init)
-       , _min(std::min(0.0, init))
-       , _max(std::max(1.0, init))
+       , _min(std::min<double>(0.0, init))
+       , _max(std::max<double>(1.0, init))
        , _step(1.0)
       {}
 
@@ -86,7 +86,7 @@ namespace cycfi { namespace qplug
       double         _max = 1.0;
       double         _step = 0.001;
       double         _curve = 1.0;
-      char const*    _unit = nullptr;
+      char const*    _unit = "";
       bool           _can_automate = true;
    };
 }}

@@ -76,7 +76,7 @@ namespace cycfi { namespace qplug
          }
       );
 
-      if constexpr(sizeof...(rest))
+      if constexpr(sizeof...(rest) != 0)
          add_parameter(id+1, rest...);
    }
 
