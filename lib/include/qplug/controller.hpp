@@ -61,9 +61,13 @@ namespace cycfi { namespace qplug
    controller_ptr make_controller(base_controller& base);
 
    template <typename ElementPtr>
-   struct virtual_controller
-    : std::enable_shared_from_this<virtual_controller<ElementPtr>>
+   struct custom_controller
+    : std::enable_shared_from_this<custom_controller<ElementPtr>>
    {
+                     custom_controller(ElementPtr& element_)
+                      : element(element_)
+                     {}
+
       virtual void   set_on_change(std::function<void(double)> const& f) = 0;
       virtual void   value(double val) = 0;
 
@@ -76,7 +80,7 @@ namespace cycfi { namespace qplug
    namespace detail
    {
       template <typename FD, typename F>
-      void assign_callback(FD& dest, F&& f)
+      inline void assign_callback(FD& dest, F&& f)
       {
          if (!dest)
          {
@@ -94,33 +98,33 @@ namespace cycfi { namespace qplug
       }
 
       template <typename Element, typename F>
-      void set_callback(Element& e, F&& f)
+      inline void set_callback(Element& e, F&& f)
       {
          assign_callback(e.on_change, std::forward<F>(f));
       }
 
       template <typename F>
-      void set_callback(elements::basic_button& e, F&& f)
+      inline void set_callback(elements::basic_button& e, F&& f)
       {
          assign_callback(e.on_click, std::forward<F>(f));
       }
 
       template <typename ElementPtr, typename F>
-      void set_callback(virtual_controller<ElementPtr>& e, F&& f)
+      inline void set_callback(custom_controller<ElementPtr>& e, F&& f)
       {
          e.set_on_change(std::forward<F>(f));
       }
 
       template <typename Element>
-      void refresh_element(Element& e, elements::view& view_)
+      inline void refresh_element(elements::view& view_, Element& e)
       {
          view_.refresh(e);
       }
 
       template <typename ElementPtr>
-      void refresh_element(elements::view& view_, virtual_controller<ElementPtr>& e)
+      inline void refresh_element(elements::view& view_, custom_controller<ElementPtr>& e)
       {
-         view_.refresh(*e->element);
+         view_.refresh(*e.element);
       }
    }
 
@@ -142,7 +146,7 @@ namespace cycfi { namespace qplug
             f = [this, control](double value)
             {
                control->value(value > 0.5);
-               refresh_element(view(), *control);
+               detail::refresh_element(*view(), *control);
             };
             break;
 
@@ -150,7 +154,7 @@ namespace cycfi { namespace qplug
             f = [this, control](double value)
             {
                control->value(int(value));
-               refresh_element(view(), *control);
+               detail::refresh_element(*view(), *control);
             };
             break;
 
@@ -158,13 +162,13 @@ namespace cycfi { namespace qplug
             f = [this, control](double value)
             {
                control->value(value);
-               refresh_element(view(), *control);
+               detail::refresh_element(*view(), *control);
             };
             break;
       }
       _on_parameter_change.push_back(f);
 
-      if constexpr(sizeof...(rest))
+      if constexpr(sizeof...(rest) > 0)
          add_controller(id+1, rest...);
    }
 
