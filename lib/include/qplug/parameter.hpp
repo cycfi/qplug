@@ -22,7 +22,6 @@ namespace cycfi { namespace qplug
        , _init(init)
        , _min(std::min(0.0, init))
        , _max(std::max(1.0, init))
-       , _step(1.0)
       {}
 
       template <typename T
@@ -55,6 +54,14 @@ namespace cycfi { namespace qplug
          r._max = max;
          r._step = step;
          std::clamp(_init, min, max);
+         return r;
+      }
+
+      template <typename T>
+      constexpr parameter step(T step_) const
+      {
+         parameter r = *this;
+         r._step = step_;
          return r;
       }
 
