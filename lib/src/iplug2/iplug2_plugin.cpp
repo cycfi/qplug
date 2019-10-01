@@ -14,7 +14,7 @@ iplug2_plugin::iplug2_plugin(InstanceInfo const& info)
 {}
 
 iplug2_plugin::iplug2_plugin(InstanceInfo const& info, controller_ptr&& cptr)
-  : Plugin(info, MakeConfig(cptr->parameters().size(), kNumPrograms))
+  : Plugin(info, MakeConfig(cptr->parameters().size(), 1))
   , _controller(std::forward<controller_ptr>(cptr))
   , _processor(qplug::make_processor(*this))
 {

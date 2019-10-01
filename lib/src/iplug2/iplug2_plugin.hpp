@@ -12,14 +12,6 @@
 #include <qplug/parameter.hpp>
 #include <memory>
 
-const int kNumPrograms = 1;
-
-enum EParams
-{
-   kGain = 0,
-   kNumParams
-};
-
 using namespace iplug;
 namespace elements = cycfi::elements;
 namespace qplug = cycfi::qplug;
