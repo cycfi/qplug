@@ -131,6 +131,18 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
          );
       }
       break;
+
+      case qplug::parameter::note:
+         GetParam(id)->InitPitch(
+            param._name
+          , param._init - param._min
+          , param._min
+          , param._max
+          , flags          // flags
+          , ""             // group
+          , true           // middleCisC
+         );
+         break;
    }
 }
 

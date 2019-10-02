@@ -6,12 +6,13 @@
 #pragma once
 #include <type_traits>
 #include <algorithm>
+#include <q/support/midi.hpp>
 
 namespace cycfi { namespace qplug
 {
    struct parameter
    {
-      enum type { bool_, int_, double_ };
+      enum type { bool_, int_, double_, note };
 
       template <typename T
        , typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr
@@ -36,12 +37,21 @@ namespace cycfi { namespace qplug
        , _step(1.0)
       {}
 
+      constexpr parameter(char const* name, q::midi::note init)
+       : _name(name)
+       , _type(note)
+       , _init(double(init))
+       , _min(double(q::midi::note::A0))
+       , _max(double(q::midi::note::G9))
+       , _step(1.0)
+      {}
+
       template <typename T>
       constexpr parameter range(T min, T max) const
       {
          parameter r = *this;
-         r._min = min;
-         r._max = max;
+         r._min = double(min);
+         r._max = double(max);
          std::clamp(_init, double(min), double(max));
          return r;
       }

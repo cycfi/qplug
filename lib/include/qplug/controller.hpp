@@ -64,7 +64,7 @@ namespace cycfi { namespace qplug
    struct custom_controller
     : std::enable_shared_from_this<custom_controller<ElementPtr>>
    {
-                     custom_controller(ElementPtr& element_)
+                     custom_controller(ElementPtr element_)
                       : element(element_)
                      {}
 
@@ -163,6 +163,14 @@ namespace cycfi { namespace qplug
             {
                control->value(value);
                detail::refresh_element(*view(), *control);
+            };
+            break;
+
+         case parameter::note:
+            f = [this, control](double value)
+            {
+                control->value(value);
+                detail::refresh_element(*view(), *control);
             };
             break;
       }
