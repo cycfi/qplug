@@ -38,7 +38,7 @@ namespace cycfi { namespace qplug
       virtual parameter_list  parameters() = 0;
 
                               template <typename... T>
-      void                    controls(T&... control);
+      void                    controls(T&&... control);
 
    private:
 
@@ -48,7 +48,7 @@ namespace cycfi { namespace qplug
       void                    parameter_change(int id, double value);
 
                               template <typename T, typename... Rest>
-      void                    add_controller(int id, T& first, Rest&... rest);
+      void                    add_controller(int id, T&& first, Rest&&... rest);
 
       using param_change = std::function<void(double)>;
       using param_change_list = std::vector<param_change>;
@@ -60,18 +60,18 @@ namespace cycfi { namespace qplug
    using controller_ptr = std::unique_ptr<controller>;
    controller_ptr make_controller(base_controller& base);
 
-   template <typename ElementPtr>
-   struct custom_controller
-    : std::enable_shared_from_this<custom_controller<ElementPtr>>
+   template <typename Ptr>
+   struct virtual_controller
+    : std::enable_shared_from_this<virtual_controller<Ptr>>
    {
-                     custom_controller(ElementPtr element_)
-                      : element(element_)
+                     virtual_controller(Ptr ptr)
+                      : _ptr(ptr)
                      {}
 
       virtual void   set_on_change(std::function<void(double)> const& f) = 0;
       virtual void   value(double val) = 0;
 
-      ElementPtr     element;
+      Ptr            _ptr;
    };
 
    ////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,8 @@ namespace cycfi { namespace qplug
       }
 
       template <typename Element, typename F>
-      inline void set_callback(Element& e, F&& f)
+      inline typename std::enable_if<std::is_base_of<elements::element, Element>::value>::type
+      set_callback(Element& e, F&& f)
       {
          assign_callback(e.on_change, std::forward<F>(f));
       }
@@ -109,27 +110,28 @@ namespace cycfi { namespace qplug
          assign_callback(e.on_click, std::forward<F>(f));
       }
 
-      template <typename ElementPtr, typename F>
-      inline void set_callback(custom_controller<ElementPtr>& e, F&& f)
+      template <typename Ptr, typename F>
+      inline void set_callback(virtual_controller<Ptr>& e, F&& f)
       {
          e.set_on_change(std::forward<F>(f));
       }
 
       template <typename Element>
-      inline void refresh_element(elements::view& view_, Element& e)
+      inline typename std::enable_if<std::is_base_of<elements::element, Element>::value>::type
+      refresh_element(elements::view& view_, Element& e)
       {
          view_.refresh(e);
       }
 
-      template <typename ElementPtr>
-      inline void refresh_element(elements::view& view_, custom_controller<ElementPtr>& e)
+      template <typename Ptr>
+      inline void refresh_element(elements::view& view_, virtual_controller<Ptr>& e)
       {
-         view_.refresh(*e.element);
+         refresh_element(view_, *e._ptr);
       }
    }
 
    template <typename T, typename... Rest>
-   inline void controller::add_controller(int id, T& control, Rest&... rest)
+   inline void controller::add_controller(int id, T&& control, Rest&&... rest)
    {
       detail::set_callback(*control,
          [this, id](auto val)
@@ -151,13 +153,6 @@ namespace cycfi { namespace qplug
             break;
 
          case parameter::int_:
-            f = [this, control](double value)
-            {
-               control->value(int(value));
-               detail::refresh_element(*view(), *control);
-            };
-            break;
-
          case parameter::double_:
             f = [this, control](double value)
             {
@@ -169,21 +164,22 @@ namespace cycfi { namespace qplug
          case parameter::note:
             f = [this, control](double value)
             {
-                control->value(value);
-                detail::refresh_element(*view(), *control);
+               // $$$ TODO: pass the actual note value $$$
+               control->value(value);
+               detail::refresh_element(*view(), *control);
             };
             break;
       }
       _on_parameter_change.push_back(f);
 
       if constexpr(sizeof...(rest) > 0)
-         add_controller(id+1, rest...);
+         add_controller(id+1, std::forward<Rest>(rest)...);
    }
 
    template <typename... T>
-   inline void controller::controls(T&... control)
+   inline void controller::controls(T&&... control)
    {
       _on_parameter_change.clear();
-      add_controller(0, control...);
+      add_controller(0, std::forward<T>(control)...);
    }
 }}
