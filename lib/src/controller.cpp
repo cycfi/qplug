@@ -21,9 +21,15 @@ namespace cycfi { namespace qplug
       _base.edit_parameter(id, value);
    }
 
-   void controller::parameter_change(int id, double value)
+   void controller::update_ui_parameter(int id, double value)
    {
       if (id < _on_parameter_change.size())
          _on_parameter_change[id](value);
+   }
+
+   void controller::parameter_change(int id, double value)
+   {
+      update_ui_parameter(id, value);
+      on_parameter_change(id, value);
    }
 }}

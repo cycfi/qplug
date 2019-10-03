@@ -41,6 +41,9 @@ namespace cycfi { namespace qplug
                               template <typename... T>
       void                    parameters(T&&... param);
 
+      virtual void            on_parameter_change(int id, double value) {}
+      virtual void            update_parameter(int id, double value);
+
    private:
 
       friend base_processor;

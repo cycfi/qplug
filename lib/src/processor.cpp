@@ -21,8 +21,15 @@ namespace cycfi { namespace qplug
       return _base.GetBypassed();
    }
 
+   void processor::update_parameter(int id, double value)
+   {
+      if (id < _on_parameter_change.size())
+         _on_parameter_change[id](value);
+   }
+
    void processor::parameter_change(int id, double value)
    {
-      _on_parameter_change[id](value);
+      update_parameter(id, value);
+      on_parameter_change(id, value);
    }
 }}

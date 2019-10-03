@@ -40,11 +40,14 @@ namespace cycfi { namespace qplug
                               template <typename... T>
       void                    controls(T&&... control);
 
+      void                    edit_parameter(int id, double value);
+      virtual void            on_parameter_change(int id, double value) {}
+      virtual void            update_ui_parameter(int id, double value);
+
    private:
 
       friend base_controller;
 
-      void                    edit_parameter(int id, double value);
       void                    parameter_change(int id, double value);
 
                               template <typename T, typename... Rest>
