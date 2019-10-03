@@ -40,7 +40,8 @@ namespace cycfi { namespace qplug
                               template <typename... T>
       void                    controls(T&&... control);
 
-      void                    edit_parameter(int id, double value);
+      void                    edit_parameter(int id, double value, bool notify_self = true);
+      virtual void            on_edit_parameter(int id, double value) {}
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
 
@@ -100,17 +101,23 @@ namespace cycfi { namespace qplug
          }
       }
 
+      template <typename T>
+      struct is_button
+      {
+         static constexpr bool value =
+            std::is_base_of<elements::basic_button, T>::value ||
+            std::is_base_of<elements::layered_button, T>::value
+            ;
+      };
+
       template <typename Element, typename F>
       inline typename std::enable_if<std::is_base_of<elements::element, Element>::value>::type
       set_callback(Element& e, F&& f)
       {
-         assign_callback(e.on_change, std::forward<F>(f));
-      }
-
-      template <typename F>
-      inline void set_callback(elements::basic_button& e, F&& f)
-      {
-         assign_callback(e.on_click, std::forward<F>(f));
+         if constexpr(is_button<Element>::value)
+            assign_callback(e.on_click, std::forward<F>(f));
+         else
+            assign_callback(e.on_change, std::forward<F>(f));
       }
 
       template <typename Ptr, typename F>

@@ -16,9 +16,11 @@ namespace cycfi { namespace qplug
       return _base.view();
    }
 
-   void controller::edit_parameter(int id, double value)
+   void controller::edit_parameter(int id, double value, bool notify_self)
    {
       _base.edit_parameter(id, value);
+      if (notify_self)
+         on_edit_parameter(id, value);
    }
 
    void controller::update_ui_parameter(int id, double value)

@@ -63,6 +63,8 @@ namespace cycfi { namespace qplug
    using processor_ptr = std::unique_ptr<processor>;
    processor_ptr make_processor(base_processor& base);
 
+   constexpr auto ignore_parameter = [](double){};
+
    ////////////////////////////////////////////////////////////////////////////
    // Inline implementation
    ////////////////////////////////////////////////////////////////////////////
