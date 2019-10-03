@@ -39,7 +39,7 @@ namespace cycfi { namespace qplug
       bool                    bypassed() const;
 
                               template <typename... T>
-      void                    parameters(T&... param);
+      void                    parameters(T&&... param);
 
    private:
 
@@ -48,7 +48,7 @@ namespace cycfi { namespace qplug
       void                    parameter_change(int id, double value);
 
                               template <typename T, typename... Rest>
-      void                    add_parameter(int id, T& param, Rest&... rest);
+      void                    add_parameter(int id, T&& param, Rest&&... rest);
 
       using param_change = std::function<void(double)>;
       using parameter_change_list = std::vector<param_change>;
@@ -63,27 +63,50 @@ namespace cycfi { namespace qplug
    ////////////////////////////////////////////////////////////////////////////
    // Inline implementation
    ////////////////////////////////////////////////////////////////////////////
-   template <typename T, typename... Rest>
-   inline void processor::add_parameter(int id, T& param, Rest&... rest)
+   namespace detail
    {
-      _on_parameter_change.push_back(
-         [this, &param](double value)
+      template <typename Class, typename Arg>
+      auto make_memfun_call(processor* proc, void(Class::*mfun)(Arg))
+      {
+         return [proc, mfun](double value)
          {
-            if constexpr(std::is_same<T, bool>::value)
-               param = value > 0.5;
-            else
-               param = value;
-         }
-      );
+            (static_cast<Class*>(proc)->*mfun)(value);
+         };
+      }
+   }
+
+   template <typename T, typename... Rest>
+   inline void processor::add_parameter(int id, T&& param, Rest&&... rest)
+   {
+      if constexpr(std::is_member_function_pointer<T>::value)
+      {
+         _on_parameter_change.push_back(detail::make_memfun_call(this, param));
+      }
+      else if constexpr(std::is_invocable<T, double>::value)
+      {
+         _on_parameter_change.push_back(std::forward<T>(param));
+      }
+      else
+      {
+         _on_parameter_change.push_back(
+            [this, &param](double value)
+            {
+               if constexpr(std::is_same<T, bool>::value)
+                  param = value > 0.5;
+               else
+                  param = value;
+            }
+         );
+      }
 
       if constexpr(sizeof...(rest) != 0)
-         add_parameter(id+1, rest...);
+         add_parameter(id+1, std::forward<Rest>(rest)...);
    }
 
    template <typename... T>
-   inline void processor::parameters(T&... param)
+   inline void processor::parameters(T&&... param)
    {
       _on_parameter_change.clear();
-      add_parameter(0, param...);
+      add_parameter(0, std::forward<T>(param)...);
    }
 }}
