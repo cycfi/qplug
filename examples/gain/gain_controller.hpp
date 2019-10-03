@@ -24,7 +24,7 @@ public:
 
 private:
 
-   dial_ptr             _dial;
+   dial_ptr             _gain;
 };
 
 #endif

@@ -64,12 +64,12 @@ void gain_controller::on_attach_view()
 {
    view()->content(
       {
-         share(make_controls(_dial)),
+         share(make_controls(_gain)),
          share(background{})
       }
    );
 
-   controls(_dial);
+   controls(_gain);
 }
 
 
