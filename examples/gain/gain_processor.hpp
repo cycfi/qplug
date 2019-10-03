@@ -3,7 +3,8 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_GAIN_PROCESSOR_JUNE_3_2019)
+#define QPLUG_GAIN_PROCESSOR_JUNE_3_2019
 
 #include <qplug/processor.hpp>
 #include <q/fx/lowpass.hpp>
@@ -25,4 +26,6 @@ private:
    double               _gain = 1.0;
    q::one_pole_lowpass  _gain_lp;
 };
+
+#endif
 

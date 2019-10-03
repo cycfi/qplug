@@ -3,7 +3,8 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_PROCESSOR_HPP_OCTOBER_17_2016)
+#define QPLUG_PROCESSOR_HPP_OCTOBER_17_2016
 
 #include <qplug/parameter.hpp>
 #include <q/support/audio_stream.hpp>
@@ -115,3 +116,5 @@ namespace cycfi { namespace qplug
       add_parameter(0, std::forward<T>(param)...);
    }
 }}
+
+#endif

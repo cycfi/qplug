@@ -3,7 +3,8 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_CONTROLLER_HPP_OCTOBER_17_2016)
+#define QPLUG_CONTROLLER_HPP_OCTOBER_17_2016
 
 #include <qplug/parameter.hpp>
 #include <infra/iterator_range.hpp>
@@ -193,3 +194,5 @@ namespace cycfi { namespace qplug
       add_controller(0, std::forward<T>(control)...);
    }
 }}
+
+#endif

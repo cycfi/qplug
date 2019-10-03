@@ -3,7 +3,8 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_IPLUG2_PLUGIN_HPP_APRIL_18_2019)
+#define QPLUG_IPLUG2_PLUGIN_HPP_APRIL_18_2019
 
 #include "IPlug_include_in_plug_hdr.h"
 #include <elements/view.hpp>
@@ -46,3 +47,5 @@ private:
    controller_ptr          _controller;
    processor_ptr           _processor;
 };
+
+#endif

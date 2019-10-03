@@ -3,7 +3,8 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_GAIN_CONTROLLER_JUNE_29_2019)
+#define QPLUG_GAIN_CONTROLLER_JUNE_29_2019
 
 #include <qplug/controller.hpp>
 #include <elements.hpp>
@@ -26,4 +27,4 @@ private:
    dial_ptr             _dial;
 };
 
-
+#endif

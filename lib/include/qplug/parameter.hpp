@@ -3,7 +3,9 @@
 
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
-#pragma once
+#if !defined(QPLUG_PARAMETER_HPP_OCTOBER_17_2016)
+#define QPLUG_PARAMETER_HPP_OCTOBER_17_2016
+
 #include <type_traits>
 #include <algorithm>
 #include <q/support/midi.hpp>
@@ -107,3 +109,5 @@ namespace cycfi { namespace qplug
       bool           _can_automate = true;
    };
 }}
+
+#endif
