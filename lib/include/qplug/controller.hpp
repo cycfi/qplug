@@ -165,6 +165,7 @@ namespace cycfi { namespace qplug
 
          case parameter::int_:
          case parameter::double_:
+         case parameter::frequency:
             f = [this, control](double value)
             {
                control->value(value);

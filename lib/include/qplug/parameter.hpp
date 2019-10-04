@@ -12,9 +12,11 @@
 
 namespace cycfi { namespace qplug
 {
+   using namespace q::literals;
+
    struct parameter
    {
-      enum type { bool_, int_, double_, note };
+      enum type { bool_, int_, double_, note, frequency };
 
       template <typename T
        , typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr
@@ -46,6 +48,14 @@ namespace cycfi { namespace qplug
        , _min(double(q::midi::note::A0))
        , _max(double(q::midi::note::G9))
        , _step(1.0)
+      {}
+
+      constexpr parameter(char const* name, q::frequency init)
+       : _name(name)
+       , _type(frequency)
+       , _init(double(init))
+       , _min(double(15_Hz))
+       , _max(double(20_kHz))
       {}
 
       template <typename T>

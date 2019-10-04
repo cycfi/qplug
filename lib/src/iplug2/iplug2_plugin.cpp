@@ -143,6 +143,18 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
           , true           // middleCisC
          );
          break;
+
+      case qplug::parameter::frequency:
+         GetParam(id)->InitFrequency(
+            param._name
+          , param._init
+          , param._min
+          , param._max
+          , param._step
+          , flags          // flags
+          , ""             // group
+         );
+         break;
    }
 }
 
