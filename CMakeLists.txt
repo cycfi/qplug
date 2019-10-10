@@ -49,4 +49,8 @@ set (QPLUG_INCLUDE_DIRS
 
 include(${QPLUG_ROOT}/cmake/external.cmake)
 
+###############################################################################
+# qplug tests
+
+add_subdirectory(test)
 

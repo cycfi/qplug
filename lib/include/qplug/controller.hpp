@@ -34,7 +34,7 @@ namespace cycfi { namespace qplug
       virtual void            on_detach_view() {}
       elements::view*         view() const;
 
-      using parameter_list = iterator_range<parameter*>;
+      using parameter_list = iterator_range<parameter const*>;
 
       virtual parameter_list  parameters() = 0;
 
