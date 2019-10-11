@@ -141,5 +141,36 @@ TEST_CASE("test_params_parser")
    }
 }
 
+TEST_CASE("test_params_parser_bad_input")
+{
+   {
+      parameter params[] =
+      {
+         parameter{ "param 1", true }
+       , parameter{ "param 2", 0.5 }
+       , parameter{ "param 3", 2_kHz }
+      };
+
+      char const* json =
+      R"(
+         {
+            "param 1" : false,
+            "param 2" : true,    // bad type
+            "param 3" : "3000"
+         }
+      )";
+
+      auto&& f = [](auto const& p, parameter const& param, std::size_t index)
+      {
+      };
+
+      auto attr = make_preset_callback(params, f);
+      bool r = test_parser(parser{}, json, attr);
+      REQUIRE(!r);
+   }
+}
+
+
+
 
 
