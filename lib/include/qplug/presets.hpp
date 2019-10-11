@@ -47,17 +47,21 @@ namespace cycfi { namespace qplug
    template <typename F>
    struct preset_callback
    {
-      parameter const*     param;
-      std::size_t const    size;
-      std::size_t          index;
-      F&&                  f;
+      using param_map = std::map<std::string_view, parameter const*>;
+
+      F&&               f;
+      param_map         params;
+      bool              start = true;
    };
 
    template <typename F>
    inline preset_callback<F>
    make_preset_callback(preset::parameter_list params, F&& f)
    {
-      return { params.begin(), params.size(), 0, std::forward<F>(f) };
+      preset_callback<F> r{ std::forward<F>(f) };
+      for (auto const& param : params)
+         r.params[param._name] = &param;
+      return std::move(r);
    }
 
    class parser : public x3::parser<parser>
@@ -97,10 +101,6 @@ namespace cycfi { namespace qplug
       // String View
       template <typename Iter, typename Ctx>
       bool parse_impl(Iter& first, Iter last, Ctx& context, std::string_view& attr) const;
-
-      // Pair
-      template <typename Iter, typename Ctx, typename Attr>
-      bool parse_impl(Iter& first, Iter last, Ctx& context, std::pair<std::string_view, Attr>& attr) const;
 
       // Main
       template <typename Iter, typename Ctx, typename F>
@@ -211,15 +211,6 @@ namespace cycfi { namespace qplug
       return false;
    }
 
-   // Pair
-   template <typename Iter, typename Ctx, typename Attr>
-   inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, std::pair<std::string_view, Attr>& attr) const
-   {
-      static auto g = parser{} >> ':' >> parser{};
-      return g.parse(first, last, context, x3::unused, attr);
-   }
-
    template <typename Iter, typename Ctx, typename F>
    inline bool
    parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_callback<F>& attr) const
@@ -227,9 +218,9 @@ namespace cycfi { namespace qplug
       if (first == last)
          return false;
 
-      if (attr.index == 0) // 0 signals start of parse
+      if (attr.start) // signals start of parse
       {
-         attr.index++;
+         attr.start = false;
          if (!x3::char_('{').parse(first, last, context, x3::unused, x3::unused))
             return false;
          while (parse_impl(first, last, context, attr))
@@ -240,51 +231,66 @@ namespace cycfi { namespace qplug
          return x3::char_('}').parse(first, last, context, x3::unused, x3::unused);
       }
 
-      auto& param = attr.param[attr.index-1]; // one based
-      auto&& parse = [&, this](auto& pair)
+      std::string_view name;
+      if (parse_impl(first, last, context, name))
       {
-         bool r = parse_impl(first, last, context, pair);
-         if (r)
-            attr.f(pair, param, attr.index++ - 1);
-         return r;
-      };
+         if (!x3::char_(':').parse(first, last, context, x3::unused, x3::unused))
+            return false;
 
-      switch (param._type)
-      {
-         case parameter::bool_:
+         auto i = attr.params.find(name);
+         if (i == attr.params.end())
+            return false;
+
+         auto& param = *i->second;
+
+         auto&& parse = [&, this](auto& val)
          {
-            std::pair<std::string_view, bool> pair;
-            return parse(pair);
-         }
-         break;
-         case parameter::int_:
-         {
-            std::pair<std::string_view, int> pair;
-            return parse(pair);
-         }
-         break;
-         case parameter::frequency:
-         case parameter::double_:
-         {
-            std::pair<std::string_view, double> pair;
-            return parse(pair);
-         }
-         break;
-         case parameter::note:
-         {
-            std::pair<std::string_view, std::string_view> pair;
-            bool r = parse_impl(first, last, context, pair);
+            bool r = parse_impl(first, last, context, val);
             if (r)
-            {
-               std::pair<std::string_view, std::uint8_t> note_pair;
-               note_pair.first = pair.first;
-               note_pair.second = q::midi::note_number(pair.second);
-               attr.f(note_pair, param, attr.index++ - 1);
-            }
+               attr.f(std::make_pair(name, val), param);
             return r;
+         };
+
+         auto&& parse_transform = [&, this](auto& val, auto&& transform)
+         {
+            bool r = parse_impl(first, last, context, val);
+            if (r)
+               attr.f(std::make_pair(name, transform(val)), param);
+            return r;
+         };
+
+         switch (param._type)
+         {
+            case parameter::bool_:
+            {
+               bool attr;
+               return parse(attr);
+            }
+            break;
+            case parameter::int_:
+            {
+               int attr;
+               return parse(attr);
+            }
+            break;
+            case parameter::frequency:
+            case parameter::double_:
+            {
+               double attr;
+               return parse(attr);
+            }
+            break;
+            case parameter::note:
+            {
+               std::string_view attr;
+               return parse_transform(attr
+                , [](auto& attr) { return q::midi::note_number(attr); }
+               );
+            }
+            break;
          }
-         break;
       }
+      return false;
    }
 
    template <typename F>

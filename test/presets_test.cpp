@@ -57,26 +57,7 @@ TEST_CASE("test_string_parser")
    std::string_view s;
    bool r = test_parser(parser{}, "\"This is a string\"", s);
    REQUIRE(r);
-   REQUIRE(s == "\"This is a string\"");
-}
-
-TEST_CASE("test_pair_parser")
-{
-   {
-      std::pair<std::string_view, int> p;
-      bool r = test_parser(parser{}, "\"This is a string\" : 1234", p);
-      REQUIRE(r);
-      REQUIRE(p.first == "\"This is a string\"");
-      REQUIRE(p.second == 1234);
-   }
-
-   {
-      std::pair<std::string_view, float> p;
-      bool r = test_parser(parser{}, "\"This is a string\" : 123.456", p);
-      REQUIRE(r);
-      REQUIRE(p.first == "\"This is a string\"");
-      REQUIRE(p.second == Approx(123.456));
-   }
+   REQUIRE(s == "This is a string");
 }
 
 TEST_CASE("test_params_parser")
@@ -103,32 +84,27 @@ TEST_CASE("test_params_parser")
          }
       )";
 
-      auto&& f = [](auto const& p, parameter const& param, std::size_t index)
+      auto&& f = [](auto const& p, parameter const& param)
       {
          switch (param._type)
          {
             case parameter::bool_:
-               CHECK(index == 0);
                CHECK(p.first == "param 1");
                CHECK(p.second == false);
                break;
             case parameter::int_:
-               CHECK(index == 1);
                CHECK(p.first == "param 2");
                CHECK(p.second == 45);
                break;
             case parameter::frequency:
-               CHECK(index == 3);
                CHECK(p.first == "param 4");
                CHECK(p.second == 1500);
                break;
             case parameter::double_:
-               CHECK(index == 2);
                CHECK(p.first == "param 3");
                CHECK(p.second == Approx(0.7));
                break;
             case parameter::note:
-               CHECK(index == 4);
                CHECK(p.first == "param 5");
                CHECK(p.second == 60);
                break;
@@ -141,34 +117,34 @@ TEST_CASE("test_params_parser")
    }
 }
 
-TEST_CASE("test_params_parser_bad_input")
-{
-   {
-      parameter params[] =
-      {
-         parameter{ "param 1", true }
-       , parameter{ "param 2", 0.5 }
-       , parameter{ "param 3", 2_kHz }
-      };
+// TEST_CASE("test_params_parser_bad_input")
+// {
+//    {
+//       parameter params[] =
+//       {
+//          parameter{ "param 1", true }
+//        , parameter{ "param 2", 0.5 }
+//        , parameter{ "param 3", 2_kHz }
+//       };
 
-      char const* json =
-      R"(
-         {
-            "param 1" : false,
-            "param 2" : true,    // bad type
-            "param 3" : "3000"
-         }
-      )";
+//       char const* json =
+//       R"(
+//          {
+//             "param 1" : false,
+//             "param 2" : true,    // bad type
+//             "param 3" : "3000"
+//          }
+//       )";
 
-      auto&& f = [](auto const& p, parameter const& param, std::size_t index)
-      {
-      };
+//       auto&& f = [](auto const& p, parameter const& param, std::size_t index)
+//       {
+//       };
 
-      auto attr = make_preset_callback(params, f);
-      bool r = test_parser(parser{}, json, attr);
-      REQUIRE(!r);
-   }
-}
+//       auto attr = make_preset_callback(params, f);
+//       bool r = test_parser(parser{}, json, attr);
+//       REQUIRE(!r);
+//    }
+// }
 
 
 
