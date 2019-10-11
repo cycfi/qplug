@@ -18,49 +18,45 @@
 
 namespace cycfi { namespace qplug
 {
-   class preset
-   {
-   public:
-
-      using parameter_list = iterator_range<parameter const*>;
-
-                        preset(
-                           parameter_list param_list
-                         , std::string_view json
-                        )
-                         : _param_list(param_list)
-                         , _json(json)
-                        {}
-
-                        template <typename F>
-      bool              parse(F&& f);
-
-   private:
-
-      parameter_list    _param_list;
-      std::string       _json;
-   };
-
    namespace x3 = boost::spirit::x3;
    namespace fusion = boost::fusion;
+   using parameter_list = iterator_range<parameter const*>;
+   using param_map = std::map<std::string_view, parameter const*>;
 
    template <typename F>
-   struct preset_callback
+   struct preset_attr
    {
-      using param_map = std::map<std::string_view, parameter const*>;
-
-      F&&               f;
-      param_map         params;
-      bool              start = true;
+      F&&         preset_info;
+      param_map   params;
    };
 
    template <typename F>
-   inline preset_callback<F>
-   make_preset_callback(preset::parameter_list params, F&& f)
+   inline preset_attr<F>
+   on_preset(parameter_list params, F&& f)
    {
-      preset_callback<F> r{ std::forward<F>(f) };
+      preset_attr<F> r{std::forward<F>(f) };
       for (auto const& param : params)
          r.params[param._name] = &param;
+      return std::move(r);
+   }
+
+   template <typename F1, typename F2>
+   struct all_presets_attr
+   {
+      preset_attr<F1>   preset_callback;
+      F2&&              preset_name;
+   };
+
+   template <typename F1, typename F2>
+   inline all_presets_attr<F1, F2>
+   for_each_preset(parameter_list params, F1&& f1, F2&& f2)
+   {
+      all_presets_attr<F1, F2> r{
+         { std::forward<F1>(f1) }, std::forward<F2>(f2)
+      };
+
+      for (auto const& param : params)
+         r.preset_callback.params[param._name] = &param;
       return std::move(r);
    }
 
@@ -102,9 +98,17 @@ namespace cycfi { namespace qplug
       template <typename Iter, typename Ctx>
       bool parse_impl(Iter& first, Iter last, Ctx& context, std::string_view& attr) const;
 
-      // Main
+      // Pair
       template <typename Iter, typename Ctx, typename F>
-      bool parse_impl(Iter& first, Iter last, Ctx& context, preset_callback<F>& attr) const;
+      bool parse_pair(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const;
+
+      // Preset
+      template <typename Iter, typename Ctx, typename F>
+      bool parse_impl(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const;
+
+      // Main
+      template <typename Iter, typename Ctx, typename F1, typename F2>
+      bool parse_impl(Iter& first, Iter last, Ctx& context, all_presets_attr<F1, F2>& attr) const;
    };
 
    std::optional<std::string> extract_string(std::string_view in);
@@ -213,41 +217,33 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx, typename F>
    inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_callback<F>& attr) const
+   parser::parse_pair(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
    {
       if (first == last)
          return false;
 
-      if (attr.start) // signals start of parse
+      auto&& parse = [&](auto const& p)
       {
-         attr.start = false;
-         if (!x3::char_('{').parse(first, last, context, x3::unused, x3::unused))
-            return false;
-         while (parse_impl(first, last, context, attr))
-         {
-            if (!x3::char_(',').parse(first, last, context, x3::unused, x3::unused))
-               break;
-         }
-         return x3::char_('}').parse(first, last, context, x3::unused, x3::unused);
-      }
+         return p.parse(first, last, context, x3::unused, x3::unused);
+      };
 
       std::string_view name;
       if (parse_impl(first, last, context, name))
       {
-         if (!x3::char_(':').parse(first, last, context, x3::unused, x3::unused))
+         if (!parse(x3::char_(':')))
             return false;
 
          auto i = attr.params.find(name);
-         if (i == attr.params.end())
+            if (i == attr.params.end())
             return false;
 
          auto& param = *i->second;
 
-         auto&& parse = [&, this](auto& val)
+         auto&& parse_attr = [&, this](auto& val)
          {
             bool r = parse_impl(first, last, context, val);
             if (r)
-               attr.f(std::make_pair(name, val), param);
+               attr.preset_info(std::make_pair(name, val), param);
             return r;
          };
 
@@ -255,7 +251,7 @@ namespace cycfi { namespace qplug
          {
             bool r = parse_impl(first, last, context, val);
             if (r)
-               attr.f(std::make_pair(name, transform(val)), param);
+               attr.preset_info(std::make_pair(name, transform(val)), param);
             return r;
          };
 
@@ -264,22 +260,19 @@ namespace cycfi { namespace qplug
             case parameter::bool_:
             {
                bool attr;
-               return parse(attr);
+               return parse_attr(attr);
             }
-            break;
             case parameter::int_:
             {
                int attr;
-               return parse(attr);
+               return parse_attr(attr);
             }
-            break;
             case parameter::frequency:
             case parameter::double_:
             {
                double attr;
-               return parse(attr);
+               return parse_attr(attr);
             }
-            break;
             case parameter::note:
             {
                std::string_view attr;
@@ -287,18 +280,65 @@ namespace cycfi { namespace qplug
                 , [](auto& attr) { return q::midi::note_number(attr); }
                );
             }
-            break;
          }
       }
       return false;
    }
 
-   template <typename F>
-   inline bool preset::parse(F&& f)
+   template <typename Iter, typename Ctx, typename F>
+   inline bool
+   parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
    {
-      auto attr = make_preset_callback(_param_list, std::forward<F>(f));
-      auto i = _json.begin();
-      return x3::phrase_parse(i, _json.end(), parser{}, x3::space, attr);
+      if (first == last)
+         return false;
+
+      auto&& parse = [&](auto const& p)
+      {
+         return p.parse(first, last, context, x3::unused, x3::unused);
+      };
+
+      if (!parse(x3::char_('{')))
+         return false;
+
+      while (parse_pair(first, last, context, attr))
+      {
+         if (!parse(x3::char_(',')))
+            break;
+      }
+
+      return parse(x3::char_('}'));
+   }
+
+   template <typename Iter, typename Ctx, typename F1, typename F2>
+   inline bool
+   parser::parse_impl(Iter& first, Iter last, Ctx& context, all_presets_attr<F1, F2>& attr) const
+   {
+      if (first == last)
+         return false;
+
+      auto&& parse = [&](auto const& p)
+      {
+         return p.parse(first, last, context, x3::unused, x3::unused);
+      };
+
+      if (!parse(x3::char_('{')))
+         return false;
+
+      std::string_view name;
+      while (parse_impl(first, last, context, name))
+      {
+         if (!parse(x3::char_(':')))
+            return false;
+         attr.preset_name(name);
+
+         if (parse_impl(first, last, context, attr.preset_callback))
+         {
+            if (parse(x3::char_(',')))
+               continue;
+         }
+      }
+
+      return parse(x3::char_('}'));
    }
 }}
 

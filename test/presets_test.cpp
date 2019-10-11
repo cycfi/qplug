@@ -60,7 +60,7 @@ TEST_CASE("test_string_parser")
    REQUIRE(s == "This is a string");
 }
 
-TEST_CASE("test_params_parser")
+TEST_CASE("test_preset_parser")
 {
    {
       parameter params[] =
@@ -111,40 +111,188 @@ TEST_CASE("test_params_parser")
          }
       };
 
-      auto attr = make_preset_callback(params, f);
+      auto attr = on_preset(params, f);
       bool r = test_parser(parser{}, json, attr);
       REQUIRE(r);
    }
 }
 
-// TEST_CASE("test_params_parser_bad_input")
-// {
-//    {
-//       parameter params[] =
-//       {
-//          parameter{ "param 1", true }
-//        , parameter{ "param 2", 0.5 }
-//        , parameter{ "param 3", 2_kHz }
-//       };
+TEST_CASE("test_preset_parser_bad_input")
+{
+   {
+      parameter params[] =
+      {
+         parameter{ "param 1", true }
+       , parameter{ "param 2", 0.5 }
+       , parameter{ "param 3", 2_kHz }
+      };
 
-//       char const* json =
-//       R"(
-//          {
-//             "param 1" : false,
-//             "param 2" : true,    // bad type
-//             "param 3" : "3000"
-//          }
-//       )";
+      char const* json =
+      R"(
+         {
+            "param 1" : false,
+            "param 2" : true,    // bad type
+            "param 3" : "3000"
+         }
+      )";
 
-//       auto&& f = [](auto const& p, parameter const& param, std::size_t index)
-//       {
-//       };
+      auto&& f = [](auto const& p, parameter const& param)
+      {
+      };
 
-//       auto attr = make_preset_callback(params, f);
-//       bool r = test_parser(parser{}, json, attr);
-//       REQUIRE(!r);
-//    }
-// }
+      auto attr = on_preset(params, f);
+      bool r = test_parser(parser{}, json, attr);
+      REQUIRE(!r);
+   }
+}
+
+TEST_CASE("test_params_parser_missing_and_unordered_fields")
+{
+   {
+      parameter params[] =
+      {
+         parameter{ "param 1", true }
+       , parameter{ "param 2", 0 }.range(0, 90)
+       , parameter{ "param 3", 0.5 }
+       , parameter{ "param 4", 2_kHz }
+       , parameter{ "param 5", q::midi::note::E2 }
+         .range(q::midi::note::A1, q::midi::note::G4)
+      };
+
+      char const* json =
+      R"(
+         {
+            "param 3" : 0.7,
+            "param 1" : false,
+            "param 4" : 1500
+         }
+      )";
+
+      auto&& f = [](auto const& p, parameter const& param)
+      {
+         switch (param._type)
+         {
+            case parameter::bool_:
+               CHECK(p.first == "param 1");
+               CHECK(p.second == false);
+               break;
+            case parameter::frequency:
+               CHECK(p.first == "param 4");
+               CHECK(p.second == 1500);
+               break;
+            case parameter::double_:
+               CHECK(p.first == "param 3");
+               CHECK(p.second == Approx(0.7));
+               break;
+            default:
+               CHECK(false); // We shouldn't get here
+         }
+      };
+
+      auto attr = on_preset(params, f);
+      bool r = test_parser(parser{}, json, attr);
+      REQUIRE(r);
+   }
+}
+
+TEST_CASE("test_multi_presets")
+{
+   parameter params[] =
+   {
+      parameter{ "param 1", true }
+    , parameter{ "param 2", 0 }.range(0, 90)
+    , parameter{ "param 3", 0.5 }
+    , parameter{ "param 4", 2_kHz }
+    , parameter{ "param 5", q::midi::note::E2 }
+      .range(q::midi::note::A1, q::midi::note::G4)
+   };
+
+   char const* json =
+   R"(
+      {
+         "preset1" :
+         {
+            "param 1" : false,
+            "param 2" : 45,
+            "param 3" : 0.7,
+            "param 4" : 1500,
+            "param 5" : "C4"
+         },
+         "preset2" :
+         {
+            "param 3" : 0.7,
+            "param 1" : false,
+            "param 4" : 1500
+         }
+      }
+   )";
+
+   std::size_t i = 0;
+   auto&& f1 = [&i](auto const& p, parameter const& param)
+   {
+      if (i == 1)
+      {
+         switch (param._type)
+         {
+            case parameter::bool_:
+               CHECK(p.first == "param 1");
+               CHECK(p.second == false);
+               break;
+            case parameter::int_:
+               CHECK(p.first == "param 2");
+               CHECK(p.second == 45);
+               break;
+            case parameter::frequency:
+               CHECK(p.first == "param 4");
+               CHECK(p.second == 1500);
+               break;
+            case parameter::double_:
+               CHECK(p.first == "param 3");
+               CHECK(p.second == Approx(0.7));
+               break;
+            case parameter::note:
+               CHECK(p.first == "param 5");
+               CHECK(p.second == 60);
+               break;
+         }
+      }
+      else if (i == 2)
+      {
+         switch (param._type)
+         {
+            case parameter::bool_:
+               CHECK(p.first == "param 1");
+               CHECK(p.second == false);
+               break;
+            case parameter::frequency:
+               CHECK(p.first == "param 4");
+               CHECK(p.second == 1500);
+               break;
+            case parameter::double_:
+               CHECK(p.first == "param 3");
+               CHECK(p.second == Approx(0.7));
+               break;
+            default:
+               CHECK(false); // We shouldn't get here
+         }
+      }
+   };
+
+   auto&& f2 = [&i](std::string_view name)
+   {
+      if (i == 0)
+         CHECK(name == "preset1");
+      else if (i == 1)
+         CHECK(name == "preset2");
+      ++i;
+   };
+
+   auto attr = for_each_preset(params, f1, f2);
+   bool r = test_parser(parser{}, json, attr);
+   REQUIRE(r);
+}
+
+
 
 
 
