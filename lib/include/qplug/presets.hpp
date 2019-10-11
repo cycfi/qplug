@@ -14,6 +14,7 @@
 #include <map>
 #include <functional>
 #include <string_view>
+#include <optional>
 
 namespace cycfi { namespace qplug
 {
@@ -24,7 +25,7 @@ namespace cycfi { namespace qplug
       using parameter_list = iterator_range<parameter const*>;
 
                         preset(
-                           parameter_list* param_list
+                           parameter_list param_list
                          , std::string_view json
                         )
                          : _param_list(param_list)
@@ -32,19 +33,32 @@ namespace cycfi { namespace qplug
                         {}
 
                         template <typename F>
-      void              for_each(F&& f);
+      bool              parse(F&& f);
 
    private:
 
-      parameter_list*   _param_list;
+      parameter_list    _param_list;
       std::string       _json;
    };
 
    namespace x3 = boost::spirit::x3;
    namespace fusion = boost::fusion;
 
-   struct malformed_json_string
-    : std::runtime_error { using runtime_error::runtime_error; };
+   template <typename F>
+   struct preset_callback
+   {
+      parameter const*     param;
+      std::size_t const    size;
+      std::size_t          index;
+      F&&                  f;
+   };
+
+   template <typename F>
+   inline preset_callback<F>
+   make_preset_callback(preset::parameter_list params, F&& f)
+   {
+      return { params.begin(), params.size(), 0, std::forward<F>(f) };
+   }
 
    class parser : public x3::parser<parser>
    {
@@ -87,7 +101,13 @@ namespace cycfi { namespace qplug
       // Pair
       template <typename Iter, typename Ctx, typename Attr>
       bool parse_impl(Iter& first, Iter last, Ctx& context, std::pair<std::string_view, Attr>& attr) const;
+
+      // Main
+      template <typename Iter, typename Ctx, typename F>
+      bool parse_impl(Iter& first, Iter last, Ctx& context, preset_callback<F>& attr) const;
    };
+
+   std::optional<std::string> extract_string(std::string_view in);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation
@@ -115,22 +135,76 @@ namespace cycfi { namespace qplug
       return x3::bool_.parse(first, last, context, x3::unused, attr);
    }
 
+   inline std::optional<std::string> extract_string(std::string_view in)
+   {
+      std::string result;
+      using uchar = std::uint32_t;   // a unicode code point
+      auto i = in.begin();
+      auto last = in.end();
+
+      for (; i < last; ++i)
+      {
+         auto ch = *i;
+         if (std::iscntrl(ch))
+            return {};
+
+         if (*i == '\\')
+         {
+            if (++i == last)
+               return {};
+
+            switch (ch = *i)
+            {
+               case 'b': result += '\b';     break;
+               case 'f': result += '\f';     break;
+               case 'n': result += '\n';     break;
+               case 'r': result += '\r';     break;
+               case 't': result += '\t';     break;
+               default: result += ch;        break;
+
+               case 'u':
+               {
+                  x3::uint_parser<uchar, 16, 4, 4> hex4;
+                  uchar code_point;
+                  auto ii = ++i;
+                  bool r = x3::parse(ii, last, hex4, code_point);
+                  if (!r)
+                     return {};
+
+                  i = ii; // update iterator position
+                  using insert_iter = std::back_insert_iterator<std::string>;
+                  insert_iter out_iter(result);
+                  boost::utf8_output_iterator<insert_iter> utf8_iter(out_iter);
+                  *utf8_iter++ = code_point;
+               }
+            }
+         }
+         else
+         {
+            result += ch;
+         }
+      }
+      return result;
+   }
+
    template <typename Iter, typename Ctx>
    inline bool
    parser::parse_impl(Iter& first, Iter last, Ctx& context, std::string_view& attr) const
    {
       x3::skip_over(first, last, context);
 
-      // Parse this manually for speed. We do not decode nor validate anything.
-      // We simply detect what looks like a double-quoted string which contains
-      // any character, including any escaped double quote (i.e. "\\\""). We'll
-      // deal with the actual string validation and extraction later.
+      // For strings, we do not decode nor validate anything. We simply
+      // detect what looks like a double-quoted string which contains any
+      // character, including any escaped double quote (i.e. "\\\""). It's up
+      // to the client to decode the escapes. We provide a utility for that
+      // (see extract_string).
 
       static auto double_quote = '"' >> *("\\\"" | (x3::char_ - '"')) >> '"';
       auto iter = first;
       if (double_quote.parse(iter, last, context, x3::unused, x3::unused))
       {
-         attr = std::string_view{first, std::size_t(iter-first)};
+         // Don't include the start and end double-quotes
+         attr = std::string_view{first+1, std::size_t(iter-first)-2};
          first = iter;
          return true;
       }
@@ -144,6 +218,81 @@ namespace cycfi { namespace qplug
    {
       static auto g = parser{} >> ':' >> parser{};
       return g.parse(first, last, context, x3::unused, attr);
+   }
+
+   template <typename Iter, typename Ctx, typename F>
+   inline bool
+   parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_callback<F>& attr) const
+   {
+      if (first == last)
+         return false;
+
+      if (attr.index == 0) // 0 signals start of parse
+      {
+         attr.index++;
+         if (!x3::char_('{').parse(first, last, context, x3::unused, x3::unused))
+            return false;
+         while (parse_impl(first, last, context, attr))
+         {
+            if (!x3::char_(',').parse(first, last, context, x3::unused, x3::unused))
+               break;
+         }
+         return x3::char_('}').parse(first, last, context, x3::unused, x3::unused);
+      }
+
+      auto& param = attr.param[attr.index-1]; // one based
+      auto&& parse = [&, this](auto& pair)
+      {
+         bool r = parse_impl(first, last, context, pair);
+         if (r)
+            attr.f(pair, param, attr.index++ - 1);
+         return r;
+      };
+
+      switch (param._type)
+      {
+         case parameter::bool_:
+         {
+            std::pair<std::string_view, bool> pair;
+            return parse(pair);
+         }
+         break;
+         case parameter::int_:
+         {
+            std::pair<std::string_view, int> pair;
+            return parse(pair);
+         }
+         break;
+         case parameter::frequency:
+         case parameter::double_:
+         {
+            std::pair<std::string_view, double> pair;
+            return parse(pair);
+         }
+         break;
+         case parameter::note:
+         {
+            std::pair<std::string_view, std::string_view> pair;
+            bool r = parse_impl(first, last, context, pair);
+            if (r)
+            {
+               std::pair<std::string_view, std::uint8_t> note_pair;
+               note_pair.first = pair.first;
+               note_pair.second = q::midi::note_number(pair.second);
+               attr.f(note_pair, param, attr.index++ - 1);
+            }
+            return r;
+         }
+         break;
+      }
+   }
+
+   template <typename F>
+   inline bool preset::parse(F&& f)
+   {
+      auto attr = make_preset_callback(_param_list, std::forward<F>(f));
+      auto i = _json.begin();
+      return x3::phrase_parse(i, _json.end(), parser{}, x3::space, attr);
    }
 }}
 
