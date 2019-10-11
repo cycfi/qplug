@@ -12,7 +12,7 @@ using namespace cycfi::qplug;
 using namespace q::literals;
 
 template <typename T>
-bool test_parser(parser const& p, char const* in, T& attr)
+bool test_parser(preset_parser const& p, char const* in, T& attr)
 {
    char const* f = in;
    char const* l = f + std::strlen(f);
@@ -23,14 +23,14 @@ TEST_CASE("test_bool_parser")
 {
    {
       bool b;
-      bool r = test_parser(parser{}, "true", b);
+      bool r = test_parser(preset_parser{}, "true", b);
       REQUIRE(r);
       REQUIRE(b == true);
    }
 
    {
       bool b;
-      bool r = test_parser(parser{}, "false", b);
+      bool r = test_parser(preset_parser{}, "false", b);
       REQUIRE(r);
       REQUIRE(b == false);
    }
@@ -39,7 +39,7 @@ TEST_CASE("test_bool_parser")
 TEST_CASE("test_int_parser")
 {
    int i;
-   bool r = test_parser(parser{}, "123", i);
+   bool r = test_parser(preset_parser{}, "123", i);
    REQUIRE(r);
    REQUIRE(i == 123);
 }
@@ -47,7 +47,7 @@ TEST_CASE("test_int_parser")
 TEST_CASE("test_double_parser")
 {
    float f;
-   bool r = test_parser(parser{}, "123.456", f);
+   bool r = test_parser(preset_parser{}, "123.456", f);
    REQUIRE(r);
    REQUIRE(f == Approx(123.456));
 }
@@ -55,7 +55,7 @@ TEST_CASE("test_double_parser")
 TEST_CASE("test_string_parser")
 {
    std::string_view s;
-   bool r = test_parser(parser{}, "\"This is a string\"", s);
+   bool r = test_parser(preset_parser{}, "\"This is a string\"", s);
    REQUIRE(r);
    REQUIRE(s == "This is a string");
 }
@@ -112,7 +112,7 @@ TEST_CASE("test_preset_parser")
       };
 
       auto attr = on_preset(params, f);
-      bool r = test_parser(parser{}, json, attr);
+      bool r = test_parser(preset_parser{}, json, attr);
       REQUIRE(r);
    }
 }
@@ -141,7 +141,7 @@ TEST_CASE("test_preset_parser_bad_input")
       };
 
       auto attr = on_preset(params, f);
-      bool r = test_parser(parser{}, json, attr);
+      bool r = test_parser(preset_parser{}, json, attr);
       REQUIRE(!r);
    }
 }
@@ -190,7 +190,7 @@ TEST_CASE("test_params_parser_missing_and_unordered_fields")
       };
 
       auto attr = on_preset(params, f);
-      bool r = test_parser(parser{}, json, attr);
+      bool r = test_parser(preset_parser{}, json, attr);
       REQUIRE(r);
    }
 }
@@ -288,7 +288,7 @@ TEST_CASE("test_multi_presets")
    };
 
    auto attr = for_each_preset(params, f1, f2);
-   bool r = test_parser(parser{}, json, attr);
+   bool r = test_parser(preset_parser{}, json, attr);
    REQUIRE(r);
 }
 

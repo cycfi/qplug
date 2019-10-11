@@ -60,7 +60,7 @@ namespace cycfi { namespace qplug
       return std::move(r);
    }
 
-   class parser : public x3::parser<parser>
+   class preset_parser : public x3::parser<preset_parser>
    {
    public:
 
@@ -78,7 +78,7 @@ namespace cycfi { namespace qplug
 
    private:
 
-      parser const& self() const { return *this; }
+      preset_parser const& self() const { return *this; }
 
       // Floating point numbers
       template <typename Iter, typename Ctx, typename Attr>
@@ -118,7 +118,7 @@ namespace cycfi { namespace qplug
 ///////////////////////////////////////////////////////////////////////////////
    template <typename Iter, typename Ctx, typename Attr>
    inline typename std::enable_if<std::is_floating_point<Attr>::value, bool>::type
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, Attr& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, Attr& attr) const
    {
       static x3::real_parser<Attr> p;
       return p.parse(first, last, context, x3::unused, attr);
@@ -126,7 +126,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx, typename Attr>
    inline typename std::enable_if<std::is_integral<Attr>::value, bool>::type
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, Attr& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, Attr& attr) const
    {
       static x3::int_parser<Attr> p;
       return p.parse(first, last, context, x3::unused, attr);
@@ -134,7 +134,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx>
    inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, bool& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, bool& attr) const
    {
       return x3::bool_.parse(first, last, context, x3::unused, attr);
    }
@@ -193,7 +193,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx>
    inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, std::string_view& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, std::string_view& attr) const
    {
       x3::skip_over(first, last, context);
 
@@ -217,7 +217,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx, typename F>
    inline bool
-   parser::parse_pair(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
+   preset_parser::parse_pair(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
    {
       if (first == last)
          return false;
@@ -234,7 +234,7 @@ namespace cycfi { namespace qplug
             return false;
 
          auto i = attr.params.find(name);
-            if (i == attr.params.end())
+         if (i == attr.params.end())
             return false;
 
          auto& param = *i->second;
@@ -287,7 +287,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx, typename F>
    inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, preset_attr<F>& attr) const
    {
       if (first == last)
          return false;
@@ -311,7 +311,7 @@ namespace cycfi { namespace qplug
 
    template <typename Iter, typename Ctx, typename F1, typename F2>
    inline bool
-   parser::parse_impl(Iter& first, Iter last, Ctx& context, all_presets_attr<F1, F2>& attr) const
+   preset_parser::parse_impl(Iter& first, Iter last, Ctx& context, all_presets_attr<F1, F2>& attr) const
    {
       if (first == last)
          return false;
