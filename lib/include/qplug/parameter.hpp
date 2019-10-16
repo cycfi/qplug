@@ -27,7 +27,6 @@ namespace cycfi { namespace qplug
        , _init(init)
        , _min(std::min(0.0, init))
        , _max(std::max(1.0, init))
-       , _unit("%")
       {}
 
       template <typename T
