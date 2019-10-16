@@ -27,6 +27,7 @@ namespace cycfi { namespace qplug
        , _init(init)
        , _min(std::min(0.0, init))
        , _max(std::max(1.0, init))
+       , _unit("%")
       {}
 
       template <typename T
@@ -56,6 +57,7 @@ namespace cycfi { namespace qplug
        , _init(double(init))
        , _min(double(15_Hz))
        , _max(double(20_kHz))
+       , _unit("Hz")
       {}
 
       template <typename T>
