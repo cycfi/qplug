@@ -170,3 +170,23 @@ void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
    _processor->parameter_change(id, GetParam(id)->Value());
 }
 
+double iplug2_plugin::get_parameter(int id)
+{
+   return GetParam(id)->Value();
+}
+
+double iplug2_plugin::get_parameter_normalized(int id)
+{
+   return GetParam(id)->GetNormalized();
+}
+
+std::uint32_t iplug2_plugin::sps() const
+{
+   return GetSampleRate();
+}
+
+bool iplug2_plugin::bypassed() const
+{
+   return GetBypassed();
+}
+

@@ -37,6 +37,11 @@ public:
 
    elements::view*         view() const { return _view.get(); }
    void                    edit_parameter(int id, double value);
+   double                  get_parameter(int id);
+   double                  get_parameter_normalized(int id);
+
+   std::uint32_t           sps() const;
+   bool                    bypassed() const;
 
 private:
 

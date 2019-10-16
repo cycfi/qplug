@@ -13,12 +13,12 @@ namespace cycfi { namespace qplug
 {
    std::uint32_t processor::sps() const
    {
-      return _base.GetSampleRate();
+      return _base.sps();
    }
 
    bool processor::bypassed() const
    {
-      return _base.GetBypassed();
+      return _base.bypassed();
    }
 
    void processor::update_parameter(int id, double value)

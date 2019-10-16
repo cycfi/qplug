@@ -34,4 +34,14 @@ namespace cycfi { namespace qplug
       update_ui_parameter(id, value);
       on_parameter_change(id, value);
    }
+
+   double controller::get_parameter(int id)
+   {
+      return _base.get_parameter(id);
+   }
+
+   double controller::get_parameter_normalized(int id)
+   {
+      return _base.get_parameter_normalized(id);
+   }
 }}

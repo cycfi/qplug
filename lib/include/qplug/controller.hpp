@@ -46,6 +46,9 @@ namespace cycfi { namespace qplug
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
 
+      double                  get_parameter(int id);
+      double                  get_parameter_normalized(int id);
+
    private:
 
       friend base_controller;
