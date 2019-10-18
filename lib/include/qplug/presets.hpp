@@ -37,7 +37,7 @@ namespace cycfi { namespace qplug
       preset_attr<F> r{std::forward<F>(f) };
       for (auto const& param : params)
          r.params[param._name] = &param;
-      return std::move(r);
+      return r;
    }
 
    template <typename F1, typename F2>
@@ -57,7 +57,7 @@ namespace cycfi { namespace qplug
 
       for (auto const& param : params)
          r.preset_callback.params[param._name] = &param;
-      return std::move(r);
+      return r;
    }
 
    class preset_parser : public x3::parser<preset_parser>

@@ -50,7 +50,7 @@ gain_controller::gain_controller(base_controller& base)
 using parameter = qplug::parameter;
 using parameter_list = gain_controller::parameter_list;
 
-parameter_list gain_controller::parameters()
+parameter_list gain_controller::parameters() const
 {
    static parameter params[] =
    {

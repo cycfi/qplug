@@ -20,7 +20,7 @@ public:
                         gain_controller(base_controller& base);
 
       void              on_attach_view() override;
-      parameter_list    parameters() override;
+      parameter_list    parameters() const override;
 
 private:
 

@@ -12,6 +12,7 @@
 #include <elements/element/button.hpp>
 #include <memory>
 #include <vector>
+#include <map>
 
 #if defined(IPLUG2)
 # include "IPlug_include_in_plug_hdr.h"
@@ -24,11 +25,9 @@ namespace cycfi { namespace qplug
    class controller
    {
    public:
-                              controller(base_controller& base)
-                               : _base(base)
-                              {}
+                              controller(base_controller& base);
                               controller(controller const&) = delete;
-      virtual                 ~controller() = default;
+      virtual                 ~controller();
 
       virtual void            on_attach_view() {}
       virtual void            on_detach_view() {}
@@ -36,7 +35,7 @@ namespace cycfi { namespace qplug
 
       using parameter_list = iterator_range<parameter const*>;
 
-      virtual parameter_list  parameters() = 0;
+      virtual parameter_list  parameters() const = 0;
 
                               template <typename... T>
       void                    controls(T&&... control);
@@ -46,8 +45,17 @@ namespace cycfi { namespace qplug
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
 
-      double                  get_parameter(int id);
-      double                  get_parameter_normalized(int id);
+      double                  get_parameter(int id) const;
+      double                  get_parameter_normalized(int id) const;
+      double                  normalize_parameter(int id, double val) const;
+
+      using preset_names_list = std::vector<std::string_view>;
+
+      bool                    load_all_presets();
+      bool                    load_preset(std::string_view name);
+      void                    save_preset(std::string_view name) const;
+      bool                    has_preset(std::string_view name) const;
+      preset_names_list       preset_list() const;
 
    private:
 

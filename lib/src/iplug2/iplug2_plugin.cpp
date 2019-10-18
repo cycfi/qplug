@@ -21,6 +21,7 @@ iplug2_plugin::iplug2_plugin(InstanceInfo const& info, controller_ptr&& cptr)
    auto params = _controller->parameters();
    for (std::size_t i = 0; i != params.size(); ++i)
       register_parameter(i, params[i]);
+   // _controller->load_all_presets();
 }
 
 void iplug2_plugin::ProcessBlock(sample** inputs, sample** outputs, int frames)
@@ -170,14 +171,19 @@ void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
    _processor->parameter_change(id, GetParam(id)->Value());
 }
 
-double iplug2_plugin::get_parameter(int id)
+double iplug2_plugin::get_parameter(int id) const
 {
    return GetParam(id)->Value();
 }
 
-double iplug2_plugin::get_parameter_normalized(int id)
+double iplug2_plugin::get_parameter_normalized(int id) const
 {
    return GetParam(id)->GetNormalized();
+}
+
+double iplug2_plugin::normalize_parameter(int id, double val) const
+{
+   return GetParam(id)->ToNormalized(val);
 }
 
 std::uint32_t iplug2_plugin::sps() const

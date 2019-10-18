@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <q/support/midi.hpp>
 
+#include <ostream>
+#include <iomanip>
+
 namespace cycfi { namespace qplug
 {
    using namespace q::literals;
@@ -102,11 +105,39 @@ namespace cycfi { namespace qplug
          return r;
       }
 
+      constexpr parameter dont_save() const
+      {
+         parameter r = *this;
+         r._save = false;
+         return r;
+      }
+
       constexpr parameter unit(char const* unit_) const
       {
          parameter r = *this;
          r._unit = unit_;
          return r;
+      }
+
+      void print(std::ostream& out, double val) const
+      {
+         switch (_type)
+         {
+            case bool_:
+               out << ((val > 0.5)? "true" : "false");
+               break;
+            case int_:
+               out << std::round(val);
+               break;
+            case frequency:
+            case double_:
+               out << val;
+               break;
+            case note:
+               auto midi_note = std::uint8_t(val);
+               out << '"' << q::midi::note_name(midi_note) << '"';
+               break;
+         }
       }
 
       char const*    _name;
@@ -118,6 +149,7 @@ namespace cycfi { namespace qplug
       double         _curve = 1.0;
       char const*    _unit = "";
       bool           _can_automate = true;
+      bool           _save = true;
    };
 }}
 
