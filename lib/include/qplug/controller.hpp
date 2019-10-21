@@ -61,6 +61,7 @@ namespace cycfi { namespace qplug
 
       virtual void            load_state(istream& str) {}
       virtual void            save_state(ostream& str) const {}
+      bool                    is_dirty() const { return _dirty; }
 
    private:
 
@@ -76,6 +77,7 @@ namespace cycfi { namespace qplug
 
       base_controller&        _base;
       param_change_list       _on_parameter_change;
+      bool                    _dirty = false;
    };
 
    using controller_ptr = std::unique_ptr<controller>;
@@ -163,6 +165,7 @@ namespace cycfi { namespace qplug
       detail::set_callback(*control,
          [this, id](auto val)
          {
+            _dirty = true;
             edit_parameter(id, val);
          }
       );

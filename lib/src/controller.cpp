@@ -161,6 +161,17 @@ namespace cycfi { namespace qplug
 
    bool controller::load_preset(std::string_view name)
    {
+      if (name == "Default")
+      {
+         int i = 0;
+         for (auto const& param : parameters())
+         {
+            auto val = normalize_parameter(i, param._init);
+            edit_parameter(i++, val, true);
+         }
+         return true;
+      }
+
       std::lock_guard<std::mutex> lock(_presets_mutex);
       auto preset_iter = _presets.find(std::string(name.begin(), name.end()));
       if (preset_iter != _presets.end())
@@ -177,6 +188,7 @@ namespace cycfi { namespace qplug
             }
             ++i;
          }
+         return true;
       }
       return false;
    }
