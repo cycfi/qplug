@@ -35,6 +35,9 @@ public:
    void                    ProcessBlock(sample** in, sample** out, int frames) override;
    void                    OnParamChange(int id, EParamSource source, int sampleOffset = -1) override;
 
+   bool                    SerializeState(IByteChunk& chunk) const override;
+   int                     UnserializeState(IByteChunk const& chunk, int start_pos) override;
+
    elements::view*         view() const { return _view.get(); }
    void                    edit_parameter(int id, double value);
    double                  normalize_parameter(int id, double val) const;

@@ -31,6 +31,16 @@ set(Q_NO_EXAMPLES YES)
 add_subdirectory(${Q_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/q")
 
 ###############################################################################
+# msgpack
+
+set(DMSGPACK_CXX17 ON)
+set(MSGPACK_BUILD_EXAMPLES OFF)
+set(MSGPACK_ENABLE_SHARED OFF)
+set(MSGPACK_ENABLE_STATIC ON)
+
+add_subdirectory("${QPLUG_ROOT}/external/msgpack-c")
+
+###############################################################################
 # qplug
 
 set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")

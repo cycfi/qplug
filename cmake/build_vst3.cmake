@@ -59,6 +59,7 @@ if (APPLE)
       ${AUDIOTOOLBOX}
       libelements
       libq
+      msgpackc-static
    )
 endif()
 
@@ -87,6 +88,7 @@ target_compile_definitions(${target}
    NO_IGRAPHICS=1
    IPLUG_DSP=1
    SAMPLE_TYPE_FLOAT=1
+   MSGPACK_DISABLE_LEGACY_NIL=1
 )
 
 set_source_files_properties(

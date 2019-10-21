@@ -4,6 +4,7 @@
    Distributed under the MIT License [ https://opensource.org/licenses/MIT ]
 =============================================================================*/
 #include "iplug2_plugin.hpp"
+#include <qplug/data_stream.hpp>
 #include "IPlug_include_in_plug_src.h"
 
 namespace elements = cycfi::elements;
@@ -21,7 +22,7 @@ iplug2_plugin::iplug2_plugin(InstanceInfo const& info, controller_ptr&& cptr)
    auto params = _controller->parameters();
    for (std::size_t i = 0; i != params.size(); ++i)
       register_parameter(i, params[i]);
-   // _controller->load_all_presets();
+   _controller->load_all_presets();
 }
 
 void iplug2_plugin::ProcessBlock(sample** inputs, sample** outputs, int frames)
@@ -169,6 +170,62 @@ void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
    if (source != kUI && _view)
       _controller->parameter_change(id, GetParam(id)->GetNormalized());
    _processor->parameter_change(id, GetParam(id)->Value());
+}
+
+namespace
+{
+   struct iplug2_ostream : qplug::ostream
+   {
+      iplug2_ostream(IByteChunk& chunk)
+       : _chunk(chunk)
+      {}
+
+      ostream& write(const char* s, std::size_t size) override
+      {
+         _ok &= _chunk.PutBytes(s, size) > 0;
+         return *this;
+      }
+
+      IByteChunk& _chunk;
+      bool        _ok = true;
+   };
+
+   struct iplug2_istream : qplug::istream
+   {
+      iplug2_istream(IByteChunk const& chunk, int start_pos)
+       : _chunk(chunk)
+       , _start_pos(start_pos)
+      {}
+
+      char const* data() const override
+      {
+         return reinterpret_cast<char const*>(_chunk.GetData()) + _start_pos;
+      }
+
+      std::size_t size() const override
+      {
+         return _chunk.Size() - _start_pos;
+      }
+
+      IByteChunk const& _chunk;
+      int               _start_pos;
+   };
+}
+
+bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
+{
+   bool ok = Plugin::SerializeState(chunk);
+   iplug2_ostream str{ chunk };
+   _controller->save_state(str);
+   return ok && str._ok;
+}
+
+int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
+{
+   auto pos = Plugin::UnserializeState(chunk, start_pos);
+   iplug2_istream str{ chunk, pos };
+   _controller->load_state(str);
+   return pos + str.offset();
 }
 
 double iplug2_plugin::get_parameter(int id) const

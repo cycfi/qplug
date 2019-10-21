@@ -7,9 +7,11 @@
 #define QPLUG_CONTROLLER_HPP_OCTOBER_17_2016
 
 #include <qplug/parameter.hpp>
+#include <qplug/data_stream.hpp>
 #include <infra/iterator_range.hpp>
 #include <elements/view.hpp>
 #include <elements/element/button.hpp>
+
 #include <memory>
 #include <vector>
 #include <map>
@@ -56,6 +58,9 @@ namespace cycfi { namespace qplug
       void                    save_preset(std::string_view name) const;
       bool                    has_preset(std::string_view name) const;
       preset_names_list       preset_list() const;
+
+      virtual void            load_state(istream& str) {}
+      virtual void            save_state(ostream& str) const {}
 
    private:
 

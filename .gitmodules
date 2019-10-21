@@ -4,3 +4,6 @@
 [submodule "external/VST3_SDK"]
 	path = external/VST3_SDK
 	url = git@github.com:steinbergmedia/vst3sdk.git
+[submodule "external/msgpack-c"]
+	path = external/msgpack-c
+	url = git@github.com:msgpack/msgpack-c.git
