@@ -34,6 +34,7 @@ namespace cycfi { namespace qplug
       virtual void            on_attach_view() {}
       virtual void            on_detach_view() {}
       elements::view*         view() const;
+      void                    resize_view(elements::extent size);
 
       using parameter_list = iterator_range<parameter const*>;
 
@@ -56,6 +57,7 @@ namespace cycfi { namespace qplug
       bool                    load_all_presets();
       bool                    load_preset(std::string_view name);
       void                    save_preset(std::string_view name) const;
+      bool                    delete_preset(std::string_view name);
       bool                    has_preset(std::string_view name) const;
       preset_names_list       preset_list() const;
 

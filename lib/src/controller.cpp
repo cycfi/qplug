@@ -120,6 +120,11 @@ namespace cycfi { namespace qplug
       return _base.view();
    }
 
+   void controller::resize_view(elements::extent size)
+   {
+      _base.resize_view(size);
+   }
+
    void controller::edit_parameter(int id, double value, bool notify_self)
    {
       _base.edit_parameter(id, value);
@@ -219,6 +224,23 @@ namespace cycfi { namespace qplug
          }
       }
       save_all_presets(parameters());
+   }
+
+   bool controller::delete_preset(std::string_view name)
+   {
+      bool proceed = false;
+      {
+         std::lock_guard<std::mutex> lock(_presets_mutex);
+         auto preset_iter = _presets.find(std::string(name.begin(), name.end()));
+         if (preset_iter != _presets.end())
+         {
+            _presets.erase(preset_iter);
+            proceed = true;
+         }
+      }
+      if (proceed)
+         save_all_presets(parameters());
+      return proceed;
    }
 
    bool controller::has_preset(std::string_view name) const

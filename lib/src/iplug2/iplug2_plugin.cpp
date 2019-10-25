@@ -160,6 +160,13 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
    }
 }
 
+void iplug2_plugin::resize_view(elements::extent size)
+{
+   EditorResizeFromUI(size.x, size.y);
+   if (view())
+      view()->size(size);
+}
+
 void iplug2_plugin::edit_parameter(int id, double value)
 {
    SendParameterValueFromUI(id, value);

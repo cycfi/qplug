@@ -39,6 +39,8 @@ public:
    int                     UnserializeState(IByteChunk const& chunk, int start_pos) override;
 
    elements::view*         view() const { return _view.get(); }
+   void                    resize_view(elements::extent size);
+
    void                    edit_parameter(int id, double value);
    double                  normalize_parameter(int id, double val) const;
    double                  get_parameter(int id) const;
