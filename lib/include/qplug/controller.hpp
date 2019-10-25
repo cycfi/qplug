@@ -62,7 +62,7 @@ namespace cycfi { namespace qplug
       preset_names_list       preset_list() const;
 
       virtual void            load_state(istream& str) {}
-      virtual void            save_state(ostream& str) const {}
+      virtual void            save_state(ostream& str) {}
       bool                    is_dirty() const { return _dirty; }
 
    private:
