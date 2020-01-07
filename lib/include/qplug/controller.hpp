@@ -59,6 +59,7 @@ namespace cycfi { namespace qplug
       void                    save_preset(std::string_view name) const;
       bool                    delete_preset(std::string_view name);
       bool                    has_preset(std::string_view name) const;
+      bool                    has_factory_preset(std::string_view name) const;
       preset_names_list       preset_list() const;
 
       virtual void            load_state(istream& str) {}

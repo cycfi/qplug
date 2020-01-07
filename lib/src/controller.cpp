@@ -7,6 +7,7 @@
 #include <qplug/presets.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <elements/support/resource_paths.hpp>
 
 #include <mutex>
 #include <cstdlib>
@@ -27,34 +28,28 @@ namespace cycfi { namespace qplug
    fs::path preset_file = preset_path/PLUG_NAME"_program.json";
 #endif
 
-   // Our presets:
+   // Factory presets:
+   preset_info_map   _factory_presets;
+   std::mutex        _factory_presets_mutex;
+
+   // User presets:
    preset_info_map   _presets;
    std::mutex        _presets_mutex;
 
-   bool load_all_presets(controller::parameter_list params)
+   bool load_all_presets(
+      std::string const& src
+    , controller::parameter_list params
+    , preset_info_map& presets)
    {
-      if (!fs::exists(preset_path))
-         fs::create_directory(preset_path);
-
-      if (!fs::exists(preset_file))
-         return false;
-
-      fs::ifstream file(preset_file);
-      std::string src(
-         (std::istreambuf_iterator<char>(file))
-       , std::istreambuf_iterator<char>());
-
       char const* f = src.data();
       char const* l = f + src.size();
-
-      preset_info_map loading_presets;
       std::string current_preset;
 
       auto&& on_param =
-         [&loading_presets, &current_preset](auto const& p, parameter const& param)
+         [&presets, &current_preset](auto const& p, parameter const& param)
          {
             std::string key(p.first.begin(), p.first.end());
-            loading_presets[current_preset][key] = p.second;
+            presets[current_preset][key] = p.second;
          };
 
       auto&& on_preset_name =
@@ -65,12 +60,52 @@ namespace cycfi { namespace qplug
 
       auto attr = for_each_preset(params, on_param, on_preset_name);
       if (x3::phrase_parse(f, l, preset_parser{}, x3::space, attr))
-      {
-         std::lock_guard<std::mutex> lock(_presets_mutex);
-         _presets.swap(loading_presets);
          return true;
-      }
       return false;
+   }
+
+   bool load_all_presets(
+      fs::path const& preset_file
+    , controller::parameter_list params
+    , preset_info_map& presets)
+   {
+      if (!fs::exists(preset_file))
+         return false;
+
+      fs::ifstream file(preset_file);
+      std::string src(
+         (std::istreambuf_iterator<char>(file))
+       , std::istreambuf_iterator<char>());
+
+      return load_all_presets(src, params, presets);
+   }
+
+   bool load_all_presets(controller::parameter_list params)
+   {
+      if (!fs::exists(preset_path))
+         fs::create_directory(preset_path);
+
+      // Load factory presets
+      {
+         std::string full_path = elements::find_file("factory_presets.json");
+         preset_info_map loading_presets;
+         if (load_all_presets(full_path, params, loading_presets))
+         {
+            std::lock_guard<std::mutex> lock(_factory_presets_mutex);
+            _factory_presets.swap(loading_presets);
+         }
+      }
+
+      // Load user presets
+      {
+         preset_info_map loading_presets;
+         if (load_all_presets(preset_file, params, loading_presets))
+         {
+            std::lock_guard<std::mutex> lock(_presets_mutex);
+            _presets.swap(loading_presets);
+         }
+      }
+      return true;
    }
 
    void save_all_presets(controller::parameter_list params)
@@ -177,9 +212,19 @@ namespace cycfi { namespace qplug
          return true;
       }
 
-      std::lock_guard<std::mutex> lock(_presets_mutex);
+      std::lock_guard<std::mutex> lock1(_presets_mutex);
+      std::lock_guard<std::mutex> lock2(_factory_presets_mutex);
+
       auto preset_iter = _presets.find(std::string(name.begin(), name.end()));
-      if (preset_iter != _presets.end())
+      auto preset_iter_end =_presets.end();
+
+      if (preset_iter == _presets.end())
+      {
+         preset_iter = _factory_presets.find(std::string(name.begin(), name.end()));
+         preset_iter_end = _factory_presets.end();
+      }
+
+      if (preset_iter != preset_iter_end)
       {
          int i = 0;
          auto& preset = preset_iter->second;
@@ -245,17 +290,43 @@ namespace cycfi { namespace qplug
 
    bool controller::has_preset(std::string_view name) const
    {
+      // Search the factory presets
+      if (has_factory_preset(name))
+         return true;
+
+      // Search the user presets
+      std::string preset_name{ name.begin(), name.end() };
       std::lock_guard<std::mutex> lock(_presets_mutex);
-      auto i = _presets.find(std::string(name.begin(), name.end()));
+      auto i = _presets.find(preset_name);
       return i != _presets.end();
+   }
+
+   bool controller::has_factory_preset(std::string_view name) const
+   {
+      // Search the factory presets
+      std::string preset_name{ name.begin(), name.end() };
+      std::lock_guard<std::mutex> lock(_factory_presets_mutex);
+      auto i = _factory_presets.find(preset_name);
+      return i != _factory_presets.end();
    }
 
    controller::preset_names_list controller::preset_list() const
    {
-      std::lock_guard<std::mutex> lock(_presets_mutex);
       preset_names_list r;
-      for (auto const& [name, program] : _presets)
-         r.push_back(name);
+
+      // Get the factory presets
+      {
+         std::lock_guard<std::mutex> lock(_factory_presets_mutex);
+         for (auto const& [name, program] : _factory_presets)
+            r.push_back(name);
+      }
+
+      // Get the user presets
+      {
+         std::lock_guard<std::mutex> lock(_presets_mutex);
+         for (auto const& [name, program] : _presets)
+            r.push_back(name);
+      }
       return r;
    }
 }}

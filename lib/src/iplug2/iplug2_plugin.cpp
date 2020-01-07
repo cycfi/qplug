@@ -223,15 +223,30 @@ bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
 {
    bool ok = Plugin::SerializeState(chunk);
    iplug2_ostream str{ chunk };
-   _controller->save_state(str);
+   try
+   {
+      _controller->save_state(str);
+   }
+   catch (...)
+   {
+      return false;
+   }
+
    return ok && str._ok;
 }
 
-int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
-{
+int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos) {
    auto pos = Plugin::UnserializeState(chunk, start_pos);
-   iplug2_istream str{ chunk, pos };
-   _controller->load_state(str);
+   iplug2_istream str{chunk, pos};
+   try
+   {
+      _controller->load_state(str);
+   }
+   catch (...)
+   {
+      return false;
+   }
+
    return pos + str.offset();
 }
 
