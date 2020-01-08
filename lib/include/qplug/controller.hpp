@@ -86,18 +86,18 @@ namespace cycfi { namespace qplug
    using controller_ptr = std::unique_ptr<controller>;
    controller_ptr make_controller(base_controller& base);
 
-   template <typename Ptr>
+   template <typename T>
    struct virtual_controller
-    : std::enable_shared_from_this<virtual_controller<Ptr>>
+    : std::enable_shared_from_this<virtual_controller<T>>
    {
-                     virtual_controller(Ptr ptr)
-                      : _ptr(ptr)
+                     virtual_controller(T subject)
+                      : _subject(subject)
                      {}
 
       virtual void   set_on_change(std::function<void(double)> const& f) = 0;
       virtual void   value(double val) = 0;
 
-      Ptr            _ptr;
+      T              _subject;
    };
 
    ////////////////////////////////////////////////////////////////////////////
@@ -155,10 +155,15 @@ namespace cycfi { namespace qplug
          view_.refresh(e);
       }
 
-      template <typename Ptr>
-      inline void refresh_element(elements::view& view_, virtual_controller<Ptr>& e)
+       template <typename Element>
+       inline void refresh_element(elements::view& view_, virtual_controller<std::shared_ptr<Element>>& e)
+       {
+          refresh_element(view_, *e._subject);
+       }
+
+      template <typename T>
+      inline void refresh_element(elements::view& view_, virtual_controller<T>& e)
       {
-         refresh_element(view_, *e._ptr);
       }
    }
 
