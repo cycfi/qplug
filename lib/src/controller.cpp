@@ -312,21 +312,37 @@ namespace cycfi { namespace qplug
 
    controller::preset_names_list controller::preset_list() const
    {
+      std::map<int, std::string_view> rmap;
       preset_names_list r;
+
+      auto&& add =
+         [&rmap, &r](auto const& name, auto const& program)
+         {
+            // If there's a "Program ID", we store it in the
+            // result sorted by the ID
+            auto iter = program.find("Program ID");
+            if (iter != program.end())
+               rmap[iter->second] = name;
+            else
+               r.push_back(name);
+         };
 
       // Get the factory presets
       {
          std::lock_guard<std::mutex> lock(_factory_presets_mutex);
          for (auto const& [name, program] : _factory_presets)
-            r.push_back(name);
+            add(name, program);
       }
 
       // Get the user presets
       {
          std::lock_guard<std::mutex> lock(_presets_mutex);
          for (auto const& [name, program] : _presets)
-            r.push_back(name);
+            add(name, program);
       }
+
+      for (auto const& [id, name] : rmap)
+         r.push_back(name);
       return r;
    }
 }}
