@@ -253,7 +253,10 @@ namespace cycfi { namespace qplug
          {
             // Skip if we do not want to save this param
             if (!param._save)
+            {
+               ++i;
                continue;
+            }
 
             if (param._type == parameter::note)
             {
