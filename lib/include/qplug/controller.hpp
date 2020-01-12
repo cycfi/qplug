@@ -56,8 +56,11 @@ namespace cycfi { namespace qplug
 
       bool                    load_all_presets();
       bool                    load_preset(std::string_view name);
+      std::string_view        find_program_id(int program_id);
+
       void                    save_preset(std::string_view name) const;
       bool                    delete_preset(std::string_view name);
+
       bool                    has_preset(std::string_view name) const;
       bool                    has_factory_preset(std::string_view name) const;
       preset_names_list       preset_list() const;

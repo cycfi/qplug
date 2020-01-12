@@ -243,6 +243,23 @@ namespace cycfi { namespace qplug
       return false;
    }
 
+   std::string_view controller::find_program_id(int program_id)
+   {
+      auto&& find_preset = [program_id](auto const& presets) -> std::string_view
+      {
+         for (auto const& [name, program] : presets)
+         {
+            auto iter = program.find("Program ID");
+            if (iter != program.end() && iter->second == program_id)
+               return name;
+         }
+         return "";
+      };
+
+      auto r = find_preset(_factory_presets);
+      return r.empty()? find_preset(_presets) : r;
+   }
+
    void controller::save_preset(std::string_view name) const
    {
       {
