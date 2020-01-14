@@ -243,7 +243,7 @@ namespace cycfi { namespace qplug
       return false;
    }
 
-   std::string_view controller::find_program_id(int program_id)
+   std::string_view controller::find_program_id(int program_id) const
    {
       auto&& find_preset = [program_id](auto const& presets) -> std::string_view
       {
@@ -273,6 +273,21 @@ namespace cycfi { namespace qplug
             {
                ++i;
                continue;
+            }
+
+            // Special case for Program IDs
+            if (std::strcmp(param._name, "Program ID") == 0)
+            {
+               // See if there's a conflict of IDs
+               int pc = get_parameter(i);
+               auto pc_owner = find_program_id(pc);
+               if (pc_owner != name)
+               {
+                  // If there's a conflict, assign the owner_preset's ID with
+                  // the preset's old ID
+                  auto& owner_preset = _presets[std::string(pc_owner.begin(), pc_owner.end())];
+                  owner_preset[param._name] = preset[param._name];
+               }
             }
 
             if (param._type == parameter::note)
