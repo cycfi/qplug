@@ -24,8 +24,8 @@ namespace cycfi { namespace qplug
 
 #if defined(__APPLE__)
    fs::path home = getenv("HOME");
-   fs::path preset_path = home/"Library/Audio/Presets"/PLUG_MFR;
-   fs::path preset_file = preset_path/PLUG_NAME"_program.json";
+   fs::path presets_path = home / "Library/Audio/Presets" / PLUG_MFR;
+   fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
 #endif
 
    // Factory presets:
@@ -82,12 +82,13 @@ namespace cycfi { namespace qplug
 
    bool load_all_presets(controller::parameter_list params)
    {
-      if (!fs::exists(preset_path))
-         fs::create_directory(preset_path);
+      if (!fs::exists(presets_path))
+         fs::create_directory(presets_path);
 
       // Load factory presets
+      if (_factory_presets.empty())
       {
-         std::string full_path = elements::find_file("factory_presets.json");
+         fs::path full_path = elements::find_file("factory_presets.json");
          preset_info_map loading_presets;
          if (load_all_presets(full_path, params, loading_presets))
          {
@@ -97,9 +98,10 @@ namespace cycfi { namespace qplug
       }
 
       // Load user presets
+      if (_presets.empty())
       {
          preset_info_map loading_presets;
-         if (load_all_presets(preset_file, params, loading_presets))
+         if (load_all_presets(presets_file, params, loading_presets))
          {
             std::lock_guard<std::mutex> lock(_presets_mutex);
             _presets.swap(loading_presets);
@@ -110,10 +112,10 @@ namespace cycfi { namespace qplug
 
    void save_all_presets(controller::parameter_list params)
    {
-      if (!fs::exists(preset_path))
-         fs::create_directory(preset_path);
+      if (!fs::exists(presets_path))
+         fs::create_directory(presets_path);
 
-      fs::ofstream file(preset_file);
+      fs::ofstream file(presets_file);
 
       std::lock_guard<std::mutex> lock(_presets_mutex);
 
@@ -281,7 +283,7 @@ namespace cycfi { namespace qplug
                // See if there's a conflict of IDs
                int pc = get_parameter(i);
                auto pc_owner = find_program_id(pc);
-               if (pc_owner != name)
+               if (pc_owner != "" && pc_owner != name)
                {
                   // If there's a conflict, assign the owner_preset's ID with
                   // the preset's old ID

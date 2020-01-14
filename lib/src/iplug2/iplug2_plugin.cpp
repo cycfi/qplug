@@ -22,7 +22,6 @@ iplug2_plugin::iplug2_plugin(InstanceInfo const& info, controller_ptr&& cptr)
    auto params = _controller->parameters();
    for (std::size_t i = 0; i != params.size(); ++i)
       register_parameter(i, params[i]);
-   _controller->load_all_presets();
 }
 
 void iplug2_plugin::ProcessBlock(sample** inputs, sample** outputs, int frames)
@@ -48,7 +47,8 @@ void* iplug2_plugin::OpenWindow(void* parent)
    else
       _view = std::make_unique<elements::view>(elements::extent{ PLUG_WIDTH, PLUG_HEIGHT });
 
-  _controller->on_attach_view();
+   _controller->on_attach_view();
+   _controller->load_all_presets();
 
    for (int id = 0; id != NParams(); ++id)
       _controller->parameter_change(id, GetParam(id)->GetNormalized());
