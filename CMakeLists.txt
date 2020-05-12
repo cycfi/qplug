@@ -8,6 +8,9 @@ cmake_minimum_required(VERSION 3.5.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+project(qplug)
+set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+
 ###############################################################################
 # elements
 
@@ -43,7 +46,6 @@ add_subdirectory("${QPLUG_ROOT}/external/msgpack-c")
 ###############################################################################
 # qplug
 
-set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
 include(${QPLUG_ROOT}/cmake/defaults.cmake)
 

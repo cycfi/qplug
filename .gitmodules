@@ -7,3 +7,6 @@
 [submodule "external/msgpack-c"]
 	path = external/msgpack-c
 	url = git@github.com:msgpack/msgpack-c.git
+[submodule "lib/infra"]
+	path = lib/infra
+	url = https://github.com/cycfi/infra
