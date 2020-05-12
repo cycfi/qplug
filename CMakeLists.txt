@@ -15,24 +15,14 @@ set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 # elements
 
 set(ELEMENTS_BUILD_EXAMPLES NO)
-
-if (NOT DEFINED ELEMENTS_ROOT)
-  set(ELEMENTS_ROOT ${CMAKE_CURRENT_LIST_DIR}/../elements)
-endif()
-
-add_subdirectory(${ELEMENTS_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/elements")
+add_subdirectory(${QPLUG_ROOT}/lib/elements)
 
 ###############################################################################
 # Q
 
-if (NOT DEFINED Q_ROOT)
-  set(Q_ROOT ${CMAKE_CURRENT_LIST_DIR}/../q)
-endif()
-
 set(Q_BUILD_EXAMPLES NO)
 set(Q_BUILD_TEST NO)
-
-add_subdirectory(${Q_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/q")
+add_subdirectory(${QPLUG_ROOT}/lib/q)
 
 ###############################################################################
 # msgpack
