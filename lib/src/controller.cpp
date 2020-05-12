@@ -5,8 +5,7 @@
 =============================================================================*/
 #include <qplug/controller.hpp>
 #include <qplug/presets.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <infra/filesystem.hpp>
 #include <elements/support/resource_paths.hpp>
 
 #include <mutex>
@@ -20,7 +19,6 @@ namespace cycfi { namespace qplug
 {
    using preset_info = std::map<std::string, double>;
    using preset_info_map = std::map<std::string, preset_info>;
-   namespace fs = boost::filesystem;
 
 #if defined(__APPLE__)
    fs::path home = getenv("HOME");
