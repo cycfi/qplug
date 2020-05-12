@@ -59,7 +59,7 @@ if (APPLE)
       ${COREGRAPHICS_LIBRARY}
       ${APPKIT_LIBRARY}
       ${AUDIOTOOLBOX}
-      libelements
+      elements
       libq
       msgpackc-static
    )
@@ -105,6 +105,7 @@ target_include_directories(${target}
    ${AU_INCLUDE_DIRS}
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_BINARY_DIR}
+   ${QPLUG_ROOT}/lib/infra/include
 )
 
 target_link_libraries(${target}
