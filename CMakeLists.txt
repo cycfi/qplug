@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(qplug)
 set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
+option(QPLUG_BUILD_TEST "build QPlug library examples" ON)
+
 ###############################################################################
 # elements
 
@@ -22,6 +24,7 @@ add_subdirectory(${QPLUG_ROOT}/lib/elements)
 
 set(Q_BUILD_EXAMPLES NO)
 set(Q_BUILD_TEST NO)
+set(Q_BUILD_IO NO)
 add_subdirectory(${QPLUG_ROOT}/lib/q)
 
 ###############################################################################
@@ -55,5 +58,6 @@ include(${QPLUG_ROOT}/cmake/external.cmake)
 ###############################################################################
 # qplug tests
 
-add_subdirectory(test)
-
+if (QPLUG_BUILD_TEST)
+   add_subdirectory(test)
+endif()

@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(gain)
 
 #------------------------------------------------------------------------------
 # QPlug
@@ -17,6 +18,7 @@ if (NOT DEFINED QPLUG_ROOT)
   set(QPLUG_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
 endif()
 
+set(QPLUG_BUILD_TEST OFF)
 add_subdirectory(${QPLUG_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/qplug")
 
 set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
