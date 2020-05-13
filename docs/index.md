@@ -1,6 +1,6 @@
-## Introduction
+# Introduction
 
-## <a name="jdeguzman"></a>About the Author
+# <a name="jdeguzman"></a>About the Author
 
 Joel got into electronics and programming in the 80s because almost
 everything in music, his first love, is becoming electronic and digital.
