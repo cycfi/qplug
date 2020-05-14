@@ -7,16 +7,7 @@
 
 using namespace elements;
 auto constexpr bkd_color = rgba(35, 35, 37, 255);
-
-struct background : element
-{
-   void draw(context const& ctx)
-   {
-      auto& cnv = ctx.canvas;
-      cnv.fill_style(bkd_color);
-      cnv.fill_rect(ctx.bounds);
-   }
-};
+auto background = box(bkd_color);
 
 auto make_dial(dial_ptr& dial_)
 {
@@ -65,7 +56,7 @@ void gain_controller::on_attach_view()
    view()->content(
       {
          share(make_controls(_gain)),
-         share(background{})
+         share(background)
       }
    );
 
