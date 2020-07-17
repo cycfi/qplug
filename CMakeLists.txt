@@ -28,6 +28,12 @@ set(Q_BUILD_IO NO)
 add_subdirectory(${QPLUG_ROOT}/lib/q)
 
 ###############################################################################
+# Boost
+
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost 1.61 REQUIRED)
+
+###############################################################################
 # msgpack
 
 set(DMSGPACK_CXX17 ON)

@@ -10,6 +10,7 @@
 
 #include <mutex>
 #include <cstdlib>
+#include <fstream>
 
 #if defined(IPLUG2)
 # include "iplug2/iplug2_plugin.hpp"
@@ -70,7 +71,7 @@ namespace cycfi { namespace qplug
       if (!fs::exists(preset_file))
          return false;
 
-      fs::ifstream file(preset_file);
+      std::ifstream file(preset_file);
       std::string src(
          (std::istreambuf_iterator<char>(file))
        , std::istreambuf_iterator<char>());
@@ -113,7 +114,7 @@ namespace cycfi { namespace qplug
       if (!fs::exists(presets_path))
          fs::create_directory(presets_path);
 
-      fs::ofstream file(presets_file);
+      std::ofstream file(presets_file);
 
       std::lock_guard<std::mutex> lock(_presets_mutex);
 

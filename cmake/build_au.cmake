@@ -18,6 +18,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 endif()
 
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost 1.61 REQUIRED)
+
 if (NOT DEFINED PLUG_ICON_FONT)
    set(PLUG_ICON_FONT ${QPLUG_ROOT}/resources/fonts/elements_basic.ttf)
 endif()
@@ -106,6 +109,7 @@ target_include_directories(${target}
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_BINARY_DIR}
    ${QPLUG_ROOT}/lib/infra/include
+   ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(${target}
