@@ -22,10 +22,9 @@ interfaces.
     alt="qplug architecture" />
 
 1. [Elements](https://github.com/cycfi/elements) is a lightweight,
-   fine-grained, resolution independent, modular GUI library. Elements, is
-   extremely lightweight… and modular. You compose very fine-grained,
-   flyweight “elements” to form deep element hierarchies using a declarative
-   interface with heavy emphasis on reuse.
+   fine-grained, resolution independent, modular GUI library. You compose
+   very fine-grained, flyweight “elements” to form deep element hierarchies
+   using a declarative interface with heavy emphasis on reuse.
 
 2. [Q](https://github.com/cycfi/Q) is a cross-platform C++ library for Audio
    Digital Signal Processing. The Q DSP Library is designed to be simple and
