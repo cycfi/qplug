@@ -18,7 +18,7 @@ if (NOT DEFINED QPLUG_ROOT)
   set(QPLUG_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
 endif()
 
-set(QPLUG_BUILD_TEST OFF)
+set(QPLUG_BUILD_TEST OFF CACHE BOOL "")
 add_subdirectory(${QPLUG_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/qplug")
 
 set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
@@ -67,5 +67,8 @@ set(PLUG_INCLUDE_DIRECTORIES
 )
 
 include(${QPLUG_ROOT}/cmake/build_vst3.cmake)
-include(${QPLUG_ROOT}/cmake/build_au.cmake)
+
+if (APPLE)
+   include(${QPLUG_ROOT}/cmake/build_au.cmake)
+endif()
 

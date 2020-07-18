@@ -11,20 +11,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(qplug)
 set(QPLUG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
-option(QPLUG_BUILD_TEST "build QPlug library examples" ON)
+option(QPLUG_BUILD_TEST "Build QPlug library tests" ON)
 
 ###############################################################################
 # elements
 
-set(ELEMENTS_BUILD_EXAMPLES NO)
+set(ELEMENTS_BUILD_EXAMPLES OFF)
 add_subdirectory(${QPLUG_ROOT}/lib/elements)
 
 ###############################################################################
 # Q
 
-set(Q_BUILD_EXAMPLES NO)
-set(Q_BUILD_TEST NO)
-set(Q_BUILD_IO NO)
+set(Q_BUILD_EXAMPLES OFF CACHE BOOL "")
+set(Q_BUILD_TEST OFF CACHE BOOL "")
+set(Q_BUILD_IO OFF CACHE BOOL "")
 add_subdirectory(${QPLUG_ROOT}/lib/q)
 
 ###############################################################################
@@ -32,16 +32,6 @@ add_subdirectory(${QPLUG_ROOT}/lib/q)
 
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.61 REQUIRED)
-
-###############################################################################
-# msgpack
-
-set(DMSGPACK_CXX17 ON)
-set(MSGPACK_BUILD_EXAMPLES OFF)
-set(MSGPACK_ENABLE_SHARED OFF)
-set(MSGPACK_ENABLE_STATIC ON)
-
-add_subdirectory("${QPLUG_ROOT}/external/msgpack-c")
 
 ###############################################################################
 # qplug

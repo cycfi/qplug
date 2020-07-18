@@ -62,7 +62,6 @@ if (APPLE)
       ${AUDIOTOOLBOX}
       elements
       libq
-      msgpackc-static
    )
 endif()
 
@@ -108,6 +107,7 @@ target_include_directories(${target}
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_BINARY_DIR}
    ${QPLUG_ROOT}/lib/infra/include
+   ${QPLUG_ROOT}/external/msgpack-c/include
    ${Boost_INCLUDE_DIRS}
 )
 

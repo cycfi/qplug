@@ -40,33 +40,30 @@ set(QPLUG_RESOURCES
    ${PLUG_RESOURCES}
 )
 
-if (APPLE)
-   find_library(AUDIOUNIT_LIBRARY AudioUnit REQUIRED)
-   find_library(COREAUDIO_LIBRARY CoreAudio REQUIRED)
-   find_library(COREMIDI_LIBRARY CoreMIDI REQUIRED)
-   find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
-   find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
-   find_library(ACCELERATE_LIBRARY Accelerate REQUIRED)
-   find_library(COREGRAPHICS_LIBRARY CoreGraphics REQUIRED)
-   find_library(APPKIT_LIBRARY AppKit REQUIRED)
-   find_library(AUDIOTOOLBOX AudioToolbox)
+find_library(AUDIOUNIT_LIBRARY AudioUnit REQUIRED)
+find_library(COREAUDIO_LIBRARY CoreAudio REQUIRED)
+find_library(COREMIDI_LIBRARY CoreMIDI REQUIRED)
+find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
+find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+find_library(ACCELERATE_LIBRARY Accelerate REQUIRED)
+find_library(COREGRAPHICS_LIBRARY CoreGraphics REQUIRED)
+find_library(APPKIT_LIBRARY AppKit REQUIRED)
+find_library(AUDIOTOOLBOX AudioToolbox)
 
-   set(QPLUG_DEPENDENCIES
-      ${QPLUG_DEPENDENCIES}
-      ${COREAUDIO_LIBRARY}
-      ${COREMIDI_LIBRARY}
-      ${COREFOUNDATION_LIBRARY}
-      ${FOUNDATION_LIBRARY}
-      ${AUDIOUNIT_LIBRARY}
-      ${ACCELERATE_LIBRARY}
-      ${COREGRAPHICS_LIBRARY}
-      ${APPKIT_LIBRARY}
-      ${AUDIOTOOLBOX}
-      elements
-      libq
-      msgpackc-static
-   )
-endif()
+set(QPLUG_DEPENDENCIES
+   ${QPLUG_DEPENDENCIES}
+   ${COREAUDIO_LIBRARY}
+   ${COREMIDI_LIBRARY}
+   ${COREFOUNDATION_LIBRARY}
+   ${FOUNDATION_LIBRARY}
+   ${AUDIOUNIT_LIBRARY}
+   ${ACCELERATE_LIBRARY}
+   ${COREGRAPHICS_LIBRARY}
+   ${APPKIT_LIBRARY}
+   ${AUDIOTOOLBOX}
+   elements
+   libq
+)
 
 configure_file(
    ${QPLUG_ROOT}/cmake/factory.cpp.in
@@ -109,6 +106,7 @@ target_include_directories(${target}
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_BINARY_DIR}
    ${QPLUG_ROOT}/lib/infra/include
+   ${QPLUG_ROOT}/external/msgpack-c/include
    ${Boost_INCLUDE_DIRS}
 )
 
@@ -122,20 +120,12 @@ configure_file(
    config.h
 )
 
-if (APPLE)
-   set_target_properties(${target}
-      PROPERTIES
-      BUNDLE true
-      BUNDLE_EXTENSION "component"
-      OUTPUT_NAME "${PLUG_NAME}"
-      MACOSX_BUNDLE_INFO_PLIST "${QPLUG_ROOT}/cmake/au.plist.in"
-   )
-
-   #add_custom_command(
-   #   TARGET ${target}
-   #   POST_BUILD
-   #   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_BUNDLE_DIR:${target}> ~/Library/Audio/Plug-ins/VST3/${PLUG_NAME}.vst3
-   #)
-endif()
+set_target_properties(${target}
+   PROPERTIES
+   BUNDLE true
+   BUNDLE_EXTENSION "component"
+   OUTPUT_NAME "${PLUG_NAME}"
+   MACOSX_BUNDLE_INFO_PLIST "${QPLUG_ROOT}/cmake/au.plist.in"
+)
 
 
