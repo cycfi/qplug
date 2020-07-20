@@ -1,12 +1,12 @@
 [submodule "external/iPlug2"]
 	path = external/iPlug2
-	url = git@github.com:cycfi/iPlug2.git
+	url = https://github.com/cycfi/iPlug2.git
 [submodule "external/VST3_SDK"]
 	path = external/VST3_SDK
-	url = git@github.com:steinbergmedia/vst3sdk.git
+	url = https://github.com/steinbergmedia/vst3sdk.git
 [submodule "external/msgpack-c"]
 	path = external/msgpack-c
-	url = git@github.com:msgpack/msgpack-c.git
+	url = https://github.com/msgpack/msgpack-c.git
 [submodule "lib/infra"]
 	path = lib/infra
 	url = https://github.com/cycfi/infra
