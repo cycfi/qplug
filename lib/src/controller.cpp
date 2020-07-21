@@ -16,6 +16,11 @@
 # include "iplug2/iplug2_plugin.hpp"
 #endif
 
+#if defined(_WIN32)
+# include <windows.h>
+# include <shlobj.h>
+#endif
+
 namespace cycfi { namespace qplug
 {
    using preset_info = std::map<std::string, double>;
@@ -25,6 +30,27 @@ namespace cycfi { namespace qplug
    fs::path home = getenv("HOME");
    fs::path presets_path = home / "Library/Audio/Presets" / PLUG_MFR;
    fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
+#endif
+
+#if defined(_WIN32)
+
+   namespace
+   {
+      fs::path get_preset_path()
+      {
+         CHAR my_documents[MAX_PATH];
+         HRESULT result = SHGetFolderPathA(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+
+         if (result != S_OK)
+            throw std::runtime_error{ "Error: Failed getting \"My Documents\" directory" };
+
+         return fs::path{ my_documents } / PLUG_MFR;
+      }
+   }
+
+   fs::path presets_path = get_preset_path();
+   fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
+
 #endif
 
    // Factory presets:

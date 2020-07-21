@@ -114,9 +114,8 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
       {
          auto linear = ShapeLinear();
          auto power = ShapePowCurve(param._curve);
-         Shape&& shape = (param._curve == 1.0)?
-            std::forward<Shape>(linear) :
-            std::forward<Shape>(power);
+         Shape const& shape = (param._curve == 1.0)?
+            static_cast<Shape const&>(linear) : static_cast<Shape const&>(power);
 
          GetParam(id)->InitDouble(
             param._name

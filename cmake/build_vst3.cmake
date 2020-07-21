@@ -65,6 +65,14 @@ if (APPLE)
    )
 endif()
 
+if (WIN32)
+   set(QPLUG_DEPENDENCIES
+      ${QPLUG_DEPENDENCIES}
+      elements
+      libq
+   )
+endif()
+
 configure_file(
    ${QPLUG_ROOT}/cmake/factory.cpp.in
    factory.cpp
@@ -93,9 +101,11 @@ target_compile_definitions(${target}
    MSGPACK_DISABLE_LEGACY_NIL=1
 )
 
-set_source_files_properties(
-   ${QPLUG_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources
-)
+if (APPLE)
+   set_source_files_properties(
+      ${QPLUG_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+   )
+endif()
 
 target_include_directories(${target}
    PUBLIC
@@ -144,7 +154,17 @@ if (APPLE)
    )
 endif()
 
-
-
-
+if (WIN32)
+   set_target_properties(${target}
+      PROPERTIES
+      SUFFIX ".vst3"
+      OUTPUT_NAME "${PLUG_NAME}"
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Contents/x86_64-win"
+   )
+   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3")
+   file(RENAME
+      "${CMAKE_BINARY_DIR}/Contents"
+      "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3/Contents"
+   )
+endif()
 

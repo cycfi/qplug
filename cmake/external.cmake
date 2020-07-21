@@ -37,7 +37,6 @@ set(VST3_SOURCES
    ${VST3_ROOT}/public.sdk/source/common/commoniids.cpp
    ${VST3_ROOT}/public.sdk/source/common/memorystream.cpp
    ${VST3_ROOT}/public.sdk/source/common/pluginview.cpp
-   ${VST3_ROOT}/public.sdk/source/main/macmain.cpp
    ${VST3_ROOT}/public.sdk/source/main/pluginfactory.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstaudioeffect.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstbus.cpp
@@ -53,6 +52,18 @@ set(VST3_SOURCES
    ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3.cpp
    ${IPLUG2_ROOT}/IPlug/VST3/IPlugVST3_ProcessorBase.cpp
 )
+
+if (APPLE)
+   set(VST3_SOURCES ${VST3_SOURCES}
+      ${VST3_ROOT}/public.sdk/source/main/macmain.cpp
+   )
+endif()
+
+if (WIN32)
+   set(VST3_SOURCES ${VST3_SOURCES}
+      ${VST3_ROOT}/public.sdk/source/main/dllmain.cpp
+   )
+endif()
 
 set(
    VST3_INCLUDE_DIRS ${VST3_ROOT}
