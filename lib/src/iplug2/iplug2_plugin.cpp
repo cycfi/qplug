@@ -23,38 +23,18 @@ struct load_dlls
    load_dlls()
    {
       auto dir = module_dir();
-      std::map<std::string, fs::path> dlls;
-
-      for (auto& item : fs::directory_iterator(dir))
-      {
-         auto path = item.path();
-         if (path.extension().string() == ".dll")
-            dlls[path.stem().string()] = path;
-
-            // auto module = LoadLibraryW(path.wstring().data());
-            // CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
-         //}
-      }
-
-      for (auto const& name : dll_link_order())
-      {
-         if (dlls.find(name) != dlls.end())
+      std::istringstream dll_names{ QPLUG_DLL_LINK_ORDER };
+      std::for_each(
+         std::istream_iterator<std::string>{dll_names}
+       , std::istream_iterator<std::string>{}
+       , [&](auto const& name)
          {
-            auto const& path = dlls[name];
+            auto const& path = dir / (name + ".dll");
+            CYCFI_ASSERT(fs::exists(path), "Fatal Error: Missing DLL (" + path.string() + ").");
             auto module = LoadLibraryW(path.wstring().data());
             CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
          }
-      }
-   }
-
-   static std::vector<std::string> dll_link_order()
-   {
-      std::istringstream dll_names{ QPLUG_DLL_LINK_ORDER };
-      std::vector<std::string> r{
-         std::istream_iterator<std::string>{dll_names},
-         std::istream_iterator<std::string>{}
-      };
-      return r;
+      );
    }
 
    static fs::path module_dir()
