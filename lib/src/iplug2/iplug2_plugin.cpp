@@ -5,10 +5,46 @@
 =============================================================================*/
 #include "iplug2_plugin.hpp"
 #include <qplug/data_stream.hpp>
+#include <infra/filesystem.hpp>
 #include "IPlug_include_in_plug_src.h"
 
 namespace elements = cycfi::elements;
 namespace q = cycfi::q;
+
+#if defined(_WIN32)
+
+namespace fs = cycfi::fs;
+
+struct load_dlls
+{
+   load_dlls()
+   {
+      for (auto& item : fs::directory_iterator(module_dir()))
+      {
+         auto path = item.path();
+         if (path.extension().string() == ".dll")
+            LoadLibraryW(path.wstring().data());
+      }
+   }
+
+   static fs::path module_dir()
+   {
+      wchar_t path[MAX_PATH];
+      HMODULE hm = nullptr;
+      constexpr auto flags =
+         GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT
+         ;
+
+      if (GetModuleHandleExW(flags, (LPCWSTR) &load_dlls::module_dir, &hm))
+         if (GetModuleFileNameW(hm, path, sizeof(path)))
+            return fs::path{ path }.parent_path();
+   }
+};
+
+auto init_dlls = load_dlls{};
+
+#endif
 
 iplug2_plugin::iplug2_plugin(InstanceInfo const& info)
   : iplug2_plugin(info, qplug::make_controller(*this))
