@@ -207,17 +207,4 @@ if (WIN32)
 
 endif()
 
-add_executable(test_load_dll  ${CMAKE_CURRENT_SOURCE_DIR}/test_load_dll.cpp)
-
-target_link_libraries(test_load_dll PRIVATE elements)
-
-set_target_properties(test_load_dll
-   PROPERTIES
-   LINK_FLAGS "/DELAYLOAD:cairo.dll /DELAYLOAD:freetype.dll /DELAYLOAD:fontconfig.dll  /DELAYLOAD:libiconv.dll  /DELAYLOAD:libxml2.dll"
-)
-
-target_link_libraries(test_load_dll
-   PRIVATE
-   Delayimp.lib
-)
 
