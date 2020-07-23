@@ -33,6 +33,7 @@ set (QPLUG_SOURCES
 set (QPLUG_INCLUDE_DIRS
    ${QPLUG_ROOT}/lib/include
 )
+set(ELEMENTS_ROOT ${QPLUG_ROOT}/lib/elements)
 
 include(${QPLUG_ROOT}/cmake/external.cmake)
 

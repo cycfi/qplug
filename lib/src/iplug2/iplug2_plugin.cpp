@@ -5,10 +5,57 @@
 =============================================================================*/
 #include "iplug2_plugin.hpp"
 #include <qplug/data_stream.hpp>
+#include <infra/filesystem.hpp>
 #include "IPlug_include_in_plug_src.h"
+#include <map>
+#include <sstream>
+#include <algorithm>
 
 namespace elements = cycfi::elements;
 namespace q = cycfi::q;
+
+#if defined(_WIN32)
+
+namespace fs = cycfi::fs;
+
+struct load_dlls
+{
+   load_dlls()
+   {
+      auto dir = module_dir();
+      std::istringstream dll_names{ QPLUG_DLL_LINK_ORDER };
+      std::for_each(
+         std::istream_iterator<std::string>{dll_names}
+       , std::istream_iterator<std::string>{}
+       , [&](auto const& name)
+         {
+            auto const& path = dir / (name + ".dll");
+            CYCFI_ASSERT(fs::exists(path), "Fatal Error: Missing DLL (" + path.string() + ").");
+            auto module = LoadLibraryW(path.wstring().data());
+            CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
+         }
+      );
+   }
+
+   static fs::path module_dir()
+   {
+      wchar_t path[MAX_PATH];
+      HMODULE hm = nullptr;
+      constexpr auto flags =
+         GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT
+         ;
+
+      if (GetModuleHandleExW(flags, (LPCWSTR) &load_dlls::module_dir, &hm))
+         if (GetModuleFileNameW(hm, path, sizeof(path)))
+            return fs::path{ path }.parent_path();
+      return {};
+   }
+};
+
+auto init_dlls = load_dlls{};
+
+#endif
 
 iplug2_plugin::iplug2_plugin(InstanceInfo const& info)
   : iplug2_plugin(info, qplug::make_controller(*this))
