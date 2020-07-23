@@ -68,6 +68,7 @@ endif()
 if (WIN32)
    set(QPLUG_DEPENDENCIES
       ${QPLUG_DEPENDENCIES}
+      Delayimp.lib
       elements
       libq
    )
@@ -155,16 +156,48 @@ if (APPLE)
 endif()
 
 if (WIN32)
+
+   #target_link_options(${target} PRIVATE
+   #   shcore.lib
+   #)
+
+   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(BUILD_PREFIX x86_64-win)
+      set(VST_VALIDATOR "${QPLUG_TOOLS}/windows/x64/validator.exe")
+   elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
+      set(BUILD_PREFIX x86-win)
+      set(VST_VALIDATOR "${QPLUG_TOOLS}/windows/x86/validator.exe")
+   endif()
+
+   set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3/Contents/${BUILD_PREFIX}")
+
    set_target_properties(${target}
       PROPERTIES
       SUFFIX ".vst3"
       OUTPUT_NAME "${PLUG_NAME}"
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Contents/x86_64-win"
+      LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}
+      LINK_FLAGS "/EXPORT:GetPluginFactory /DELAYLOAD:cairo.dll /DELAYLOAD:freetype.dll /DELAYLOAD:fontconfig.dll"
    )
-   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3")
-   file(RENAME
-      "${CMAKE_BINARY_DIR}/Contents"
-      "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3/Contents"
+
+   if (CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bits?
+      set(CAIRO_DLL ${ELEMENTS_ROOT}/lib/external/cairo/lib/x64/cairo.dll)
+      set(FREETYPE_DLL ${ELEMENTS_ROOT}/lib/external/freetype/win64/freetype.dll)
+      set(FONTCONFIG_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x64/fontconfig.dll)
+   else()
+      set(CAIRO_DLL ${ELEMENTS_ROOT}/lib/external/cairo/lib/x86/cairo.dll)
+      set(FREETYPE_DLL ${ELEMENTS_ROOT}/lib/external/freetype/win32/freetype.dll)
+      set(FONTCONFIG_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x86/fontconfig.dll)
+   endif()
+
+   file(COPY ${CAIRO_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
+   file(COPY ${FREETYPE_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
+   file(COPY ${FONTCONFIG_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
+   add_custom_target(
+      ${target}_test
+      COMMAND "${VST_VALIDATOR}" "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3"
+      DEPENDS ${target}
+      VERBATIM
    )
+
 endif()
 
