@@ -179,15 +179,21 @@ if (WIN32)
       set(CAIRO_DLL ${ELEMENTS_ROOT}/lib/external/cairo/lib/x64/cairo.dll)
       set(FREETYPE_DLL ${ELEMENTS_ROOT}/lib/external/freetype/win64/freetype.dll)
       set(FONTCONFIG_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x64/fontconfig.dll)
+      set(ICONV_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x64/libiconv.dll)
+      set(XML2 ${ELEMENTS_ROOT}/lib/external/fontconfig/x64/libxml2.dll)
    else()
       set(CAIRO_DLL ${ELEMENTS_ROOT}/lib/external/cairo/lib/x86/cairo.dll)
       set(FREETYPE_DLL ${ELEMENTS_ROOT}/lib/external/freetype/win32/freetype.dll)
       set(FONTCONFIG_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x86/fontconfig.dll)
+      set(ICONV_DLL ${ELEMENTS_ROOT}/lib/external/fontconfig/x86/libiconv.dll)
+      set(XML2 ${ELEMENTS_ROOT}/lib/external/fontconfig/x86/libxml2.dll)
    endif()
 
    file(COPY ${CAIRO_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
    file(COPY ${FREETYPE_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
    file(COPY ${FONTCONFIG_DLL} DESTINATION "${OUTPUT_DIRECTORY}")
+   file(COPY ${ICONV_DLL} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+   file(COPY ${XML2} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
    add_custom_target(
       ${target}_test
       COMMAND "${VST_VALIDATOR}" "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3"
@@ -195,6 +201,23 @@ if (WIN32)
       VERBATIM
    )
 
+   target_compile_definitions(${target}
+      PRIVATE "-DQPLUG_DLL_LINK_ORDER=\"cairo freetype libiconv libxml2 fontconfig\""
+   )
+
 endif()
 
 add_executable(test_load_dll  ${CMAKE_CURRENT_SOURCE_DIR}/test_load_dll.cpp)
+
+target_link_libraries(test_load_dll PRIVATE elements)
+
+set_target_properties(test_load_dll
+   PROPERTIES
+   LINK_FLAGS "/DELAYLOAD:cairo.dll /DELAYLOAD:freetype.dll /DELAYLOAD:fontconfig.dll  /DELAYLOAD:libiconv.dll  /DELAYLOAD:libxml2.dll"
+)
+
+target_link_libraries(test_load_dll
+   PRIVATE
+   Delayimp.lib
+)
+

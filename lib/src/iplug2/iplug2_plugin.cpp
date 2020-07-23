@@ -7,6 +7,9 @@
 #include <qplug/data_stream.hpp>
 #include <infra/filesystem.hpp>
 #include "IPlug_include_in_plug_src.h"
+#include <map>
+#include <sstream>
+#include <algorithm>
 
 namespace elements = cycfi::elements;
 namespace q = cycfi::q;
@@ -19,12 +22,39 @@ struct load_dlls
 {
    load_dlls()
    {
-      for (auto& item : fs::directory_iterator(module_dir()))
+      auto dir = module_dir();
+      std::map<std::string, fs::path> dlls;
+
+      for (auto& item : fs::directory_iterator(dir))
       {
          auto path = item.path();
          if (path.extension().string() == ".dll")
-            LoadLibraryW(path.wstring().data());
+            dlls[path.stem().string()] = path;
+
+            // auto module = LoadLibraryW(path.wstring().data());
+            // CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
+         //}
       }
+
+      for (auto const& name : dll_link_order())
+      {
+         if (dlls.find(name) != dlls.end())
+         {
+            auto const& path = dlls[name];
+            auto module = LoadLibraryW(path.wstring().data());
+            CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
+         }
+      }
+   }
+
+   static std::vector<std::string> dll_link_order()
+   {
+      std::istringstream dll_names{ QPLUG_DLL_LINK_ORDER };
+      std::vector<std::string> r{
+         std::istream_iterator<std::string>{dll_names},
+         std::istream_iterator<std::string>{}
+      };
+      return r;
    }
 
    static fs::path module_dir()
@@ -39,6 +69,7 @@ struct load_dlls
       if (GetModuleHandleExW(flags, (LPCWSTR) &load_dlls::module_dir, &hm))
          if (GetModuleFileNameW(hm, path, sizeof(path)))
             return fs::path{ path }.parent_path();
+      return {};
    }
 };
 

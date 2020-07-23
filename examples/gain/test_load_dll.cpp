@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include <filesystem>
+#include <cairo.h>
+#include <fontconfig/fontconfig.h>
 
 int main()
 {
@@ -15,6 +17,13 @@ int main()
    auto module = LoadLibraryW(wstr.data());
 
    auto err = GetLastError();
+
+   {
+      auto addr = &cairo_pattern_create_linear;
+      auto addr2 = &FcInit;
+   }
+
+   FcInit();
 
    return module == nullptr;
 }
