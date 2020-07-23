@@ -157,10 +157,6 @@ endif()
 
 if (WIN32)
 
-   #target_link_options(${target} PRIVATE
-   #   shcore.lib
-   #)
-
    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(BUILD_PREFIX x86_64-win)
       set(VST_VALIDATOR "${QPLUG_TOOLS}/windows/x64/validator.exe")
@@ -201,3 +197,4 @@ if (WIN32)
 
 endif()
 
+add_executable(test_load_dll  ${CMAKE_CURRENT_SOURCE_DIR}/test_load_dll.cpp)
