@@ -68,7 +68,7 @@ namespace cycfi { namespace qplug
          parameter r = *this;
          r._min = double(min);
          r._max = double(max);
-         std::clamp(_init, double(min), double(max));
+         (void) std::clamp(_init, double(min), double(max));
          return r;
       }
 

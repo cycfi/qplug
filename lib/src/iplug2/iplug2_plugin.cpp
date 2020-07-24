@@ -7,8 +7,8 @@
 #include <qplug/data_stream.hpp>
 #include <infra/filesystem.hpp>
 #include "IPlug_include_in_plug_src.h"
-#include <map>
 #include <sstream>
+#include <elements/support/font.hpp>
 #include <algorithm>
 
 namespace elements = cycfi::elements;
@@ -18,10 +18,11 @@ namespace q = cycfi::q;
 
 namespace fs = cycfi::fs;
 
-struct load_dlls
+struct startup
 {
-   load_dlls()
+   startup()
    {
+      // Load DLLS
       auto dir = module_dir();
       std::istringstream dll_names{ QPLUG_DLL_LINK_ORDER };
       std::for_each(
@@ -35,6 +36,10 @@ struct load_dlls
             CYCFI_ASSERT(module != nullptr, "Fatal Error: Failed to load DLL (" + path.string() + ").");
          }
       );
+
+      // Setup the font directory as per VST3 specs:
+      // https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html
+      elements::font_paths().push_back(dir.parent_path() / "Resources");
    }
 
    static fs::path module_dir()
@@ -46,14 +51,14 @@ struct load_dlls
          GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT
          ;
 
-      if (GetModuleHandleExW(flags, (LPCWSTR) &load_dlls::module_dir, &hm))
+      if (GetModuleHandleExW(flags, (LPCWSTR) &startup::module_dir, &hm))
          if (GetModuleFileNameW(hm, path, sizeof(path)))
             return fs::path{ path }.parent_path();
       return {};
    }
 };
 
-auto init_dlls = load_dlls{};
+auto _startup = startup{};
 
 #endif
 

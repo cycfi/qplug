@@ -92,6 +92,13 @@ add_library(${target} MODULE
    ${QPLUG_RESOURCES}
 )
 
+# Get rid of certain warnings
+target_compile_options(${target} PRIVATE
+   $<$<CXX_COMPILER_ID:GNU>: -Wextra -Wpedantic -ftemplate-backtrace-limit=0>
+   $<$<CXX_COMPILER_ID:Clang>: -Wpedantic -ftemplate-backtrace-limit=0>
+   $<$<CXX_COMPILER_ID:MSVC>: /wd4068 /wd4244 /wd4305 /wd4996 /wd4267 /wd4018>
+)
+
 target_compile_definitions(${target}
    PUBLIC
    IPLUG2=1
@@ -203,6 +210,11 @@ if (WIN32)
 
    target_compile_definitions(${target}
       PRIVATE "-DQPLUG_DLL_LINK_ORDER=\"cairo freetype libiconv libxml2 fontconfig\""
+   )
+
+   file(
+      COPY ${QPLUG_RESOURCES}
+      DESTINATION "${CMAKE_BINARY_DIR}/${PLUG_NAME}.vst3/Contents/Resources"
    )
 
 endif()
