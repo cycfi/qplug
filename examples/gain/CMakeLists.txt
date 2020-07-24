@@ -18,24 +18,7 @@ if (NOT DEFINED QPLUG_ROOT)
   set(QPLUG_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
 endif()
 
-set(QPLUG_BUILD_TEST OFF CACHE BOOL "")
-add_subdirectory(${QPLUG_ROOT} "${CMAKE_CURRENT_BINARY_DIR}/qplug")
-
-set(QPLUG_TOOLS "${QPLUG_ROOT}/external/tools")
-include(${QPLUG_ROOT}/cmake/defaults.cmake)
-
-set (QPLUG_SOURCES
-   ${QPLUG_ROOT}/lib/src/processor.cpp
-   ${QPLUG_ROOT}/lib/src/controller.cpp
-   ${QPLUG_ROOT}/lib/src/iplug2/iplug2_plugin.cpp
-)
-
-set (QPLUG_INCLUDE_DIRS
-   ${QPLUG_ROOT}/lib/include
-)
-set(ELEMENTS_ROOT ${QPLUG_ROOT}/lib/elements)
-
-include(${QPLUG_ROOT}/cmake/external.cmake)
+include(${QPLUG_ROOT}/cmake/qplug.cmake)
 
 #------------------------------------------------------------------------------
 # gain plugin
