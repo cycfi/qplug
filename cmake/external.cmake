@@ -40,7 +40,6 @@ set(VST3_SOURCES
    ${VST3_ROOT}/public.sdk/source/main/pluginfactory.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstaudioeffect.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstbus.cpp
-   ${VST3_ROOT}/public.sdk/source/vst/vstbypassprocessor.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstcomponent.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstcomponentbase.cpp
    ${VST3_ROOT}/public.sdk/source/vst/vstinitiids.cpp
