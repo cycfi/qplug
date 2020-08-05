@@ -16,7 +16,7 @@
 			<key>sandboxSafe</key>
 			<true/>
 			<key>subtype</key>
-			<string>${AUV2_SUBTYPE}</string>
+			<string>${PLUG_UNIQUE_ID}</string>
 			<key>type</key>
 			<string>${AUV2_TYPE}</string>
 			<key>version</key>

@@ -18,8 +18,6 @@ set(BUNDLE_MFR "AcmeInc")
 set(BUNDLE_DOMAIN "com")
 
 set(AUV2_TYPE "aufx")
-set(AUV2_SUBTYPE ${PLUG_UNIQUE_ID})
-
 set(PLUG_CHANNEL_IO "2-2")
 
 set(PLUG_LATENCY 0)

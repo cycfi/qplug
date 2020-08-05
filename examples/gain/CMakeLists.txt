@@ -32,9 +32,7 @@ set(PLUG_UNIQUE_ID 5wGu)
 set(BUNDLE_MFR "CycfiInc")
 set(PLUG_WIDTH 400)
 set(PLUG_HEIGHT 350)
-
 set(AUV2_TYPE "aufx")
-set(AUV2_SUBTYPE "gain")
 
 set(PLUG_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/gain_controller.cpp
