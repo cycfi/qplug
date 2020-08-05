@@ -33,6 +33,7 @@ public:
    void                    OnReset() override;
    void                    OnActivate(bool active) override;
    void                    ProcessBlock(sample** in, sample** out, int frames) override;
+   void                    ProcessMidiMsg(const IMidiMsg& msg) override;
    void                    OnParamChange(int id, EParamSource source, int sampleOffset = -1) override;
 
    bool                    SerializeState(IByteChunk& chunk) const override;

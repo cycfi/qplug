@@ -10,7 +10,9 @@ namespace cycfi { namespace qplug
 {
    controller_ptr make_controller(base_controller& base)
    {
-      return std::make_unique<${PLUG_CONTROLLER}>(base);
+      auto r = std::make_unique<${PLUG_CONTROLLER}>(base);
+      r->receive_midi<${PLUG_CONTROLLER}>();
+      return r;
    }
 
    processor_ptr make_processor(base_processor& base)

@@ -8,6 +8,7 @@
 
 #include <qplug/parameter.hpp>
 #include <qplug/data_stream.hpp>
+#include <q/support/midi.hpp>
 #include <infra/iterator_range.hpp>
 #include <elements/view.hpp>
 #include <elements/element/button.hpp>
@@ -15,6 +16,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <type_traits>
 
 #if defined(IPLUG2)
 # include "IPlug_include_in_plug_hdr.h"
@@ -27,6 +29,7 @@ namespace cycfi { namespace qplug
    class controller
    {
    public:
+
                               controller(base_controller& base);
                               controller(controller const&) = delete;
       virtual                 ~controller();
@@ -69,6 +72,10 @@ namespace cycfi { namespace qplug
       virtual void            save_state(ostream& str) {}
       bool                    is_dirty() const { return _dirty; }
 
+                              template <typename Derived>
+      void                    receive_midi();
+      void                    process_midi(q::midi::raw_message msg, std::size_t time);
+
    private:
 
       friend base_controller;
@@ -84,6 +91,9 @@ namespace cycfi { namespace qplug
       base_controller&        _base;
       param_change_list       _on_parameter_change;
       bool                    _dirty = false;
+
+      using midi_event = std::function<void(q::midi::raw_message msg, std::size_t time)>;
+      midi_event              _on_midi_event;
    };
 
    using controller_ptr = std::unique_ptr<controller>;
@@ -223,6 +233,25 @@ namespace cycfi { namespace qplug
    {
       _on_parameter_change.clear();
       add_controller(0, std::forward<T>(control)...);
+   }
+
+   template <typename Derived>
+   inline void controller::receive_midi()
+   {
+      if constexpr(std::is_base_of_v<Derived, q::midi::processor>)
+      {
+         _on_midi_event =
+            [this](q::midi::raw_message msg, std::size_t time)
+            {
+               q::midi::dispatch(msg, time, *static_cast<Derived*>(this)());
+            };
+      }
+   }
+
+   inline void controller::process_midi(q::midi::raw_message msg, std::size_t time)
+   {
+      if (_on_midi_event)
+         _on_midi_event(msg, time);
    }
 }}
 

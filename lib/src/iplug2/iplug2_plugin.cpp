@@ -92,6 +92,10 @@ void iplug2_plugin::ProcessBlock(sample** inputs, sample** outputs, int frames)
    );
 }
 
+void iplug2_plugin::ProcessMidiMsg(const IMidiMsg& msg)
+{
+}
+
 void* iplug2_plugin::OpenWindow(void* parent)
 {
    if (parent)
