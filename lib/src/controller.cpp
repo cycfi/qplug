@@ -190,6 +190,9 @@ namespace cycfi { namespace qplug
    void controller::edit_parameter(int id, double value, bool notify_self)
    {
       _base.edit_parameter(id, value);
+   #if defined(AU_API)
+      update_ui_parameter(id, value);
+   #endif
       if (notify_self)
          on_edit_parameter(id, value);
    }
