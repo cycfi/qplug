@@ -290,7 +290,8 @@ bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
    return ok && str._ok;
 }
 
-int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos) {
+int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
+{
    auto pos = Plugin::UnserializeState(chunk, start_pos);
    iplug2_istream str{chunk, pos};
    try
