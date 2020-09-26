@@ -105,10 +105,10 @@ namespace cycfi { namespace qplug
          return r;
       }
 
-      constexpr parameter dont_save() const
+      constexpr parameter dont_save_in_preset() const
       {
          parameter r = *this;
-         r._save = false;
+         r._save_in_preset = false;
          return r;
       }
 
@@ -149,7 +149,7 @@ namespace cycfi { namespace qplug
       double         _curve = 1.0;
       char const*    _unit = "";
       bool           _can_automate = true;
-      bool           _save = true;
+      bool           _save_in_preset = true;
    };
 }}
 

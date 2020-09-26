@@ -46,7 +46,7 @@ namespace cycfi { namespace qplug
                               template <typename... T>
       void                    controls(T&&... control);
 
-      void                    edit_parameter(int id, double value, bool notify_self = true);
+      void                    edit_parameter(int id, double value, bool notify_self);
       virtual void            on_edit_parameter(int id, double value) {}
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
@@ -168,11 +168,11 @@ namespace cycfi { namespace qplug
          view_.refresh(e);
       }
 
-       template <typename Element>
-       inline void refresh_element(elements::view& view_, virtual_controller<std::shared_ptr<Element>>& e)
-       {
-          refresh_element(view_, *e._subject);
-       }
+      template <typename Element>
+      inline void refresh_element(elements::view& view_, virtual_controller<std::shared_ptr<Element>>& e)
+      {
+         refresh_element(view_, *e._subject);
+      }
 
       template <typename T>
       inline void refresh_element(elements::view& view_, virtual_controller<T>& e)
@@ -187,7 +187,7 @@ namespace cycfi { namespace qplug
          [this, id](auto val)
          {
             _dirty = true;
-            edit_parameter(id, val);
+            edit_parameter(id, val, true);
          }
       );
 

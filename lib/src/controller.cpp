@@ -299,7 +299,7 @@ namespace cycfi { namespace qplug
          for (auto const &param : parameters())
          {
             // Skip if we do not want to save this param
-            if (!param._save)
+            if (!param._save_in_preset)
             {
                ++i;
                continue;
