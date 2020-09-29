@@ -94,6 +94,9 @@ void iplug2_plugin::ProcessBlock(sample** inputs, sample** outputs, int frames)
 
 void iplug2_plugin::ProcessMidiMsg(const IMidiMsg& msg)
 {
+   q::midi::raw_message raw_midi = { 0 };
+   raw_midi.data = msg.mStatus | (msg.mData1 << 8) | (msg.mData2 << 16);
+   _controller->process_midi(raw_midi, msg.mOffset);
 }
 
 void* iplug2_plugin::OpenWindow(void* parent)

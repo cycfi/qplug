@@ -93,7 +93,7 @@ namespace cycfi { namespace qplug
       bool                    _dirty = false;
 
       using midi_event = std::function<void(q::midi::raw_message msg, std::size_t time)>;
-      midi_event              _on_midi_event;
+      midi_event              _on_midi_event = [](auto, auto){};
    };
 
    using controller_ptr = std::unique_ptr<controller>;
@@ -250,8 +250,7 @@ namespace cycfi { namespace qplug
 
    inline void controller::process_midi(q::midi::raw_message msg, std::size_t time)
    {
-      if (_on_midi_event)
-         _on_midi_event(msg, time);
+      _on_midi_event(msg, time);
    }
 }}
 
