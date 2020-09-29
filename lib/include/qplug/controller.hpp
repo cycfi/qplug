@@ -72,8 +72,8 @@ namespace cycfi { namespace qplug
       virtual void            save_state(ostream& str) {}
       bool                    is_dirty() const { return _dirty; }
 
-                              template <typename Derived>
-      void                    receive_midi();
+                              template <typename MIDIProcessor>
+      void                    receive_midi(MIDIProcessor& proc);
       void                    process_midi(q::midi::raw_message msg, std::size_t time);
 
    private:
@@ -235,17 +235,14 @@ namespace cycfi { namespace qplug
       add_controller(0, std::forward<T>(control)...);
    }
 
-   template <typename Derived>
-   inline void controller::receive_midi()
+   template <typename MIDIProcessor>
+   inline void controller::receive_midi(MIDIProcessor& proc)
    {
-      if constexpr(std::is_base_of_v<Derived, q::midi::processor>)
-      {
-         _on_midi_event =
-            [this](q::midi::raw_message msg, std::size_t time)
-            {
-               q::midi::dispatch(msg, time, *static_cast<Derived*>(this)());
-            };
-      }
+      _on_midi_event =
+         [&proc](q::midi::raw_message msg, std::size_t time)
+         {
+            q::midi::dispatch(msg, time, proc);
+         };
    }
 
    inline void controller::process_midi(q::midi::raw_message msg, std::size_t time)
