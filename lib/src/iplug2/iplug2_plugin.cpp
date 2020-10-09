@@ -247,7 +247,8 @@ namespace
 
       ostream& write(const char* s, std::size_t size) override
       {
-         _ok &= _chunk.PutBytes(s, size) > 0;
+         if (_ok)
+            _ok &= _chunk.PutBytes(s, size) > 0;
          return *this;
       }
 
@@ -279,8 +280,17 @@ namespace
 
 bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
 {
-   bool ok = Plugin::SerializeState(chunk);
+   IByteChunk::InitChunkWithIPlugVer(chunk);
    iplug2_ostream str{ chunk };
+
+   int num_params = mParams.GetSize();
+   str << num_params;
+   for (int i = 0; i < num_params; ++i)
+   {
+      IParam* param = mParams.Get(i);
+      str << param->GetName() << param->Value();
+   }
+
    try
    {
       _controller->save_state(str);
@@ -290,23 +300,74 @@ bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
       return false;
    }
 
-   return ok && str._ok;
+   return str._ok;
+}
+
+namespace
+{
+   IParam* get_param(std::string_view name, WDL_PtrList<IParam> const& params)
+   {
+      int n = params.GetSize();
+      for (int i = 0; i < n; ++i)
+      {
+         IParam* param = params.Get(i);
+         if (param->GetName() == name)
+            return param;
+      }
+      return nullptr;
+   }
 }
 
 int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
 {
-   auto pos = Plugin::UnserializeState(chunk, start_pos);
-   iplug2_istream str{chunk, pos};
-   try
-   {
-      _controller->load_state(str);
-   }
-   catch (...)
-   {
-      return false;
-   }
+   auto current_version = GetPluginVersion(false);
+   auto version = IByteChunk::GetIPlugVerFromChunk(chunk, start_pos);
 
-   return pos + str.offset();
+   if (version != current_version) // $$$ temporary $$$
+   {
+      auto pos = Plugin::UnserializeState(chunk, start_pos);
+      iplug2_istream str{ chunk, pos };
+      try
+      {
+         _controller->load_state(str);
+      }
+      catch (...)
+      {
+         return false;
+      }
+
+      return pos + str.offset();
+   }
+   else
+   {
+      iplug2_istream str{ chunk, start_pos };
+      int num_params;
+      str >> num_params;
+
+      ENTER_PARAMS_MUTEX
+      for (int i = 0; i < num_params; ++i)
+      {
+         std::string name;
+         double value;
+         str >> name >> value;
+
+         auto param = get_param(name, mParams);
+         if (param)
+            param->Set(value);
+      }
+      OnParamReset(kPresetRecall);
+      LEAVE_PARAMS_MUTEX
+
+      try
+      {
+         _controller->load_state(str);
+      }
+      catch (...)
+      {
+         return false;
+      }
+   }
+   return start_pos;
 }
 
 double iplug2_plugin::get_parameter(int id) const
