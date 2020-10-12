@@ -389,7 +389,7 @@ namespace cycfi { namespace qplug
             if (iter != program.end())
                rmap[iter->second] = name;
             else
-               r.push_back(name);
+               r.push_back({ name, -1 });
          };
 
       // Get the factory presets
@@ -407,7 +407,7 @@ namespace cycfi { namespace qplug
       }
 
       for (auto const& [id, name] : rmap)
-         r.push_back(name);
+         r.push_back({ name, id });
       return r;
    }
 }}

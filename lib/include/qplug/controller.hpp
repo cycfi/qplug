@@ -55,7 +55,7 @@ namespace cycfi { namespace qplug
       double                  get_parameter_normalized(int id) const;
       double                  normalize_parameter(int id, double val) const;
 
-      using preset_names_list = std::vector<std::string_view>;
+      using preset_names_list = std::vector<std::pair<std::string_view, int>>;
 
       bool                    load_all_presets();
       bool                    load_preset(std::string_view name);
