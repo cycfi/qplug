@@ -42,6 +42,8 @@ public:
    elements::view*         view() const { return _view.get(); }
    void                    resize_view(elements::extent size);
 
+   void                    set_parameter(int id, double value);
+   void                    recall_parameter(int id, double value);
    void                    edit_parameter(int id, double value);
    double                  normalize_parameter(int id, double val) const;
    double                  get_parameter(int id) const;

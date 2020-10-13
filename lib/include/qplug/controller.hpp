@@ -46,8 +46,16 @@ namespace cycfi { namespace qplug
                               template <typename... T>
       void                    controls(T&&... control);
 
-      void                    edit_parameter(int id, double value, bool notify_self);
+      // Call when the program wants to change parameter programmatically
+      void                    set_parameter(int id, double value);
+      virtual void            on_set_parameter(int id, double value) {}
+
+      // Called when parameter is being loaded via preset
+      virtual void            on_recall_parameter(int id, double value) {}
+
+      // Called when user is editing a parameter via the GUI
       virtual void            on_edit_parameter(int id, double value) {}
+
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
 
@@ -59,11 +67,13 @@ namespace cycfi { namespace qplug
 
       bool                    load_all_presets();
       bool                    load_preset(std::string_view name);
-      std::string_view        find_program_id(int program_id) const;
+      std::string_view        find_preset(int program_id) const;
+      int                     find_preset_id(std::string_view name) const;
 
       void                    save_preset(std::string_view name) const;
       bool                    delete_preset(std::string_view name);
 
+      bool                    has_preset(int id) const;
       bool                    has_preset(std::string_view name) const;
       bool                    has_factory_preset(std::string_view name) const;
       preset_names_list       preset_list() const;
@@ -80,6 +90,8 @@ namespace cycfi { namespace qplug
 
       friend base_controller;
 
+      void                    recall_parameter(int id, double value);
+      void                    edit_parameter(int id, double value);
       void                    parameter_change(int id, double value);
 
                               template <typename T, typename... Rest>
@@ -184,15 +196,15 @@ namespace cycfi { namespace qplug
    inline void controller::add_controller(int id, T&& control, Rest&&... rest)
    {
       detail::set_callback(*control,
-         [this, id](auto val)
+         [this, id](auto val) // Called when the user interacts with the GUI
          {
             _dirty = true;
-            edit_parameter(id, val, true);
+            edit_parameter(id, val);
          }
       );
 
       auto const& param = parameters()[id];
-      param_change f;
+      param_change f; // Called when the host wants to update the UI
       switch (param._type)
       {
          case parameter::bool_:

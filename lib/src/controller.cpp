@@ -187,14 +187,22 @@ namespace cycfi { namespace qplug
       _base.resize_view(size);
    }
 
-   void controller::edit_parameter(int id, double value, bool notify_self)
+   void controller::set_parameter(int id, double value)
+   {
+      _base.set_parameter(id, value);
+      on_set_parameter(id, value);
+   }
+
+   void controller::recall_parameter(int id, double value)
+   {
+      _base.recall_parameter(id, value);
+      on_recall_parameter(id, value);
+   }
+
+   void controller::edit_parameter(int id, double value)
    {
       _base.edit_parameter(id, value);
-   #if defined(AU_API)
-      update_ui_parameter(id, value);
-   #endif
-      if (notify_self)
-         on_edit_parameter(id, value);
+      on_edit_parameter(id, value);
    }
 
    void controller::update_ui_parameter(int id, double value)
@@ -237,7 +245,7 @@ namespace cycfi { namespace qplug
          for (auto const& param : parameters())
          {
             auto val = normalize_parameter(i, param._init);
-            edit_parameter(i++, val, true);
+            recall_parameter(i++, val);
          }
          return true;
       }
@@ -264,7 +272,7 @@ namespace cycfi { namespace qplug
             if (param_iter != preset.end())
             {
                auto val = normalize_parameter(i, param_iter->second);
-               edit_parameter(i, val, true);
+               recall_parameter(i, val);
             }
             ++i;
          }
@@ -273,7 +281,7 @@ namespace cycfi { namespace qplug
       return false;
    }
 
-   std::string_view controller::find_program_id(int program_id) const
+   std::string_view controller::find_preset(int program_id) const
    {
       auto&& find_preset = [program_id](auto const& presets) -> std::string_view
       {
@@ -288,6 +296,30 @@ namespace cycfi { namespace qplug
 
       auto r = find_preset(_factory_presets);
       return r.empty()? find_preset(_presets) : r;
+   }
+
+   int controller::find_preset_id(std::string_view name) const
+   {
+      std::lock_guard<std::mutex> lock1(_presets_mutex);
+      std::lock_guard<std::mutex> lock2(_factory_presets_mutex);
+
+      auto preset_iter = _presets.find(std::string(name.begin(), name.end()));
+      auto preset_iter_end =_presets.end();
+
+      if (preset_iter == _presets.end())
+      {
+         preset_iter = _factory_presets.find(std::string(name.begin(), name.end()));
+         preset_iter_end = _factory_presets.end();
+      }
+
+      if (preset_iter != preset_iter_end)
+      {
+         auto const& preset = preset_iter->second;
+         auto iter = preset.find("Program ID");
+         if (iter != preset.end())
+            return iter->second;
+      }
+      return -1;
    }
 
    void controller::save_preset(std::string_view name) const
@@ -310,7 +342,7 @@ namespace cycfi { namespace qplug
             {
                // See if there's a conflict of IDs
                int pc = get_parameter(i);
-               auto pc_owner = find_program_id(pc);
+               auto pc_owner = find_preset(pc);
                if (pc_owner != "" && pc_owner != name)
                {
                   // If there's a conflict, assign the owner_preset's ID with
@@ -351,6 +383,11 @@ namespace cycfi { namespace qplug
       if (proceed)
          save_all_presets(parameters());
       return proceed;
+   }
+
+   bool controller::has_preset(int id) const
+   {
+      return !find_preset(id).empty();
    }
 
    bool controller::has_preset(std::string_view name) const

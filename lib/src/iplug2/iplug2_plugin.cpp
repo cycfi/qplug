@@ -225,6 +225,27 @@ void iplug2_plugin::resize_view(elements::extent size)
       view()->size(size);
 }
 
+void iplug2_plugin::set_parameter(int id, double value)
+{
+   IParam* param = mParams.Get(id);
+   if (param)
+   {
+      param->SetNormalized(value);
+      _processor->parameter_change(id, GetParam(id)->Value());
+   }
+}
+
+void iplug2_plugin::recall_parameter(int id, double value)
+{
+   IParam* param = mParams.Get(id);
+   if (param)
+   {
+      param->SetNormalized(value);
+      OnParamChange(id, kPresetRecall);
+      OnParamChangeUI(id, kPresetRecall);
+   }
+}
+
 void iplug2_plugin::edit_parameter(int id, double value)
 {
    SendParameterValueFromUI(id, value);
@@ -311,7 +332,7 @@ namespace
       for (int i = 0; i < n; ++i)
       {
          IParam* param = params.Get(i);
-         if (param->GetName() == name)
+         if (param && param->GetName() == name)
             return param;
       }
       return nullptr;
