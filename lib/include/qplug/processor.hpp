@@ -18,7 +18,7 @@ class iplug2_plugin;
 using base_processor = iplug2_plugin;
 #endif
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    class processor : public q::audio_stream
    {
@@ -115,6 +115,6 @@ namespace cycfi { namespace qplug
       _on_parameter_change.clear();
       add_parameter(0, std::forward<T>(param)...);
    }
-}}
+}
 
 #endif

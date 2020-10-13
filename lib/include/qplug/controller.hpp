@@ -24,7 +24,7 @@ class iplug2_plugin;
 using base_controller = iplug2_plugin;
 #endif
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    class controller
    {
@@ -40,13 +40,12 @@ namespace cycfi { namespace qplug
       void                    resize_view(elements::extent size);
 
       using parameter_list = iterator_range<parameter const*>;
-
       virtual parameter_list  parameters() const = 0;
 
                               template <typename... T>
       void                    controls(T&&... control);
 
-      // Call when the program wants to change parameter programmatically
+      // Call this when the program wants to change parameter programmatically
       void                    set_parameter(int id, double value);
       virtual void            on_set_parameter(int id, double value) {}
 
@@ -261,6 +260,6 @@ namespace cycfi { namespace qplug
    {
       _on_midi_event(msg, time);
    }
-}}
+}
 
 #endif

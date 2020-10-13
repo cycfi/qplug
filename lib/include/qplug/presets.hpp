@@ -16,7 +16,7 @@
 #include <string_view>
 #include <optional>
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    namespace x3 = boost::spirit::x3;
    namespace fusion = boost::fusion;
@@ -340,6 +340,6 @@ namespace cycfi { namespace qplug
 
       return parse(x3::char_('}'));
    }
-}}
+}
 
 #endif

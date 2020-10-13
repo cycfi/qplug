@@ -21,7 +21,7 @@
 # include <shlobj.h>
 #endif
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    using preset_info = std::map<std::string, double>;
    using preset_info_map = std::map<std::string, preset_info>;
@@ -447,4 +447,4 @@ namespace cycfi { namespace qplug
          r.push_back({ name, id });
       return r;
    }
-}}
+}

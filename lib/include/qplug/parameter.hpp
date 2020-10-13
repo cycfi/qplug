@@ -13,7 +13,7 @@
 #include <ostream>
 #include <iomanip>
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    using namespace q::literals;
 
@@ -151,6 +151,6 @@ namespace cycfi { namespace qplug
       bool           _can_automate = true;
       bool           _save_in_preset = true;
    };
-}}
+}
 
 #endif

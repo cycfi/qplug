@@ -9,7 +9,7 @@
 # include "iplug2/iplug2_plugin.hpp"
 #endif
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    std::uint32_t processor::sps() const
    {
@@ -32,4 +32,4 @@ namespace cycfi { namespace qplug
       update_parameter(id, value);
       on_parameter_change(id, value);
    }
-}}
+}

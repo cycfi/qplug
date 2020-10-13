@@ -8,7 +8,7 @@
 
 #include <infra/data_stream.hpp>
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    struct ostream : cycfi::ostream<ostream>
    {
@@ -20,6 +20,6 @@ namespace cycfi { namespace qplug
       virtual char const* data() const = 0;
       virtual std::size_t size() const = 0;
    };
-}}
+}
 
 #endif

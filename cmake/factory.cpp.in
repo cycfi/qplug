@@ -6,7 +6,7 @@
 #include <${PLUG_CONTROLLER_INCLUDE}>
 #include <${PLUG_PROCESSOR_INCLUDE}>
 
-namespace cycfi { namespace qplug
+namespace cycfi::qplug
 {
    controller_ptr make_controller(base_controller& base)
    {
@@ -17,5 +17,5 @@ namespace cycfi { namespace qplug
    {
       return std::make_unique<${PLUG_PROCESSOR}>(base);
    }
-}}
+}
 
