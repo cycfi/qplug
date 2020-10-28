@@ -254,7 +254,9 @@ void iplug2_plugin::edit_parameter(int id, double value)
 void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
 {
    if (source != kUI && _view)
-      _controller->parameter_change(id, GetParam(id)->GetNormalized());
+      _controller->update_ui_parameter(id, GetParam(id)->GetNormalized());
+   if (source == kHost)
+      _controller->on_parameter_change(id, GetParam(id)->GetNormalized());
    _processor->parameter_change(id, GetParam(id)->Value());
 }
 

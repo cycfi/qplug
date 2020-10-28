@@ -57,6 +57,7 @@ namespace cycfi::qplug
 
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
+      virtual void            on_update_ui_parameter(int id, double value) {}
 
       double                  get_parameter(int id) const;
       double                  get_parameter_normalized(int id) const;

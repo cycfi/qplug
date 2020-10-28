@@ -209,6 +209,7 @@ namespace cycfi::qplug
    {
       if (id < _on_parameter_change.size())
          _on_parameter_change[id](value);
+      on_update_ui_parameter(id, value);
    }
 
    void controller::parameter_change(int id, double value)
