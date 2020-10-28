@@ -110,7 +110,7 @@ void* iplug2_plugin::OpenWindow(void* parent)
    _controller->load_all_presets();
 
    for (int id = 0; id != NParams(); ++id)
-      _controller->parameter_change(id, GetParam(id)->GetNormalized());
+      _controller->update_ui_parameter(id, GetParam(id)->GetNormalized());
 
    _view->refresh();
    return _view->host();
