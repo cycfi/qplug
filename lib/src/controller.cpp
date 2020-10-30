@@ -199,10 +199,20 @@ namespace cycfi::qplug
       on_recall_parameter(id, value);
    }
 
+   void controller::begin_edit(int id)
+   {
+      _base.begin_edit(id);
+   }
+
    void controller::edit_parameter(int id, double value)
    {
       _base.edit_parameter(id, value);
       on_edit_parameter(id, value);
+   }
+
+   void controller::end_edit(int id)
+   {
+      _base.end_edit(id);
    }
 
    void controller::update_ui_parameter(int id, double value)

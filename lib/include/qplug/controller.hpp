@@ -55,6 +55,10 @@ namespace cycfi::qplug
       // Called when user is editing a parameter via the GUI
       virtual void            on_edit_parameter(int id, double value) {}
 
+      // Call these two before and after editing a parameter via the GUI
+      void                    begin_edit(int id);
+      void                    end_edit(int id);
+
       virtual void            on_parameter_change(int id, double value) {}
       virtual void            update_ui_parameter(int id, double value);
       virtual void            on_update_ui_parameter(int id, double value) {}

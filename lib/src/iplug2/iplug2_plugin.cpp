@@ -246,25 +246,33 @@ void iplug2_plugin::recall_parameter(int id, double value)
    }
 }
 
-void iplug2_plugin::edit_parameter(int id, double value)
-{
-   SendParameterValueFromUI(id, value);
-}
-
 #if defined(AU_API)
    constexpr auto au_api = true;
 #else
    constexpr auto au_api = false;
 #endif
 
-void iplug2_plugin::OnParamChange(int id, EParamSource source, int sampleOffset)
+void iplug2_plugin::begin_edit(int id)
+{
+   BeginInformHostOfParamChangeFromUI(id);
+}
+
+void iplug2_plugin::edit_parameter(int id, double value)
+{
+   SendParameterValueFromUI(id, value);
+   if constexpr(au_api)
+      _controller->on_parameter_change(id, value);
+}
+
+void iplug2_plugin::end_edit(int id)
+{
+   EndInformHostOfParamChangeFromUI(id);
+}
+
+void iplug2_plugin::OnParamChange(int id, EParamSource source, int /*sampleOffset*/)
 {
    if (source != kUI && _view)
-   {
       _controller->update_ui_parameter(id, GetParam(id)->GetNormalized());
-      if constexpr(au_api)
-         _controller->on_parameter_change(id, GetParam(id)->GetNormalized());
-   }
    if (source == kHost)
       _controller->on_parameter_change(id, GetParam(id)->GetNormalized());
    _processor->parameter_change(id, GetParam(id)->Value());

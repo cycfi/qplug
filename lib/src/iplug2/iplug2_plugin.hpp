@@ -44,7 +44,9 @@ public:
 
    void                    set_parameter(int id, double value);
    void                    recall_parameter(int id, double value);
+   void                    begin_edit(int id);
    void                    edit_parameter(int id, double value);
+   void                    end_edit(int id);
    double                  normalize_parameter(int id, double val) const;
    double                  get_parameter(int id) const;
    double                  get_parameter_normalized(int id) const;
