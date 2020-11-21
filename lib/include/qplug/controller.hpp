@@ -55,8 +55,9 @@ namespace cycfi::qplug
       // Called when user is editing a parameter via the GUI
       virtual void            on_edit_parameter(int id, double value) {}
 
-      // Call these two before and after editing a parameter via the GUI
+      // Call these before, while and after editing a parameter via the GUI
       void                    begin_edit(int id);
+      void                    edit_parameter(int id, double value);
       void                    end_edit(int id);
 
       virtual void            on_parameter_change(int id, double value) {}
@@ -95,7 +96,6 @@ namespace cycfi::qplug
       friend base_controller;
 
       void                    recall_parameter(int id, double value);
-      void                    edit_parameter(int id, double value);
       void                    parameter_change(int id, double value);
 
                               template <typename T, typename... Rest>
@@ -127,6 +127,14 @@ namespace cycfi::qplug
       virtual void   value(double val) = 0;
 
       T              _subject;
+   };
+
+   template <>
+   struct virtual_controller<void>
+    : std::enable_shared_from_this<virtual_controller<void>>
+   {
+      virtual void   set_on_change(std::function<void(double)> const& f) = 0;
+      virtual void   value(double val) = 0;
    };
 
    ////////////////////////////////////////////////////////////////////////////
