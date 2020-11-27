@@ -9,6 +9,7 @@
 #include "IPlug_include_in_plug_src.h"
 #include <sstream>
 #include <elements/support/font.hpp>
+#include <elements/support/resource_paths.hpp>
 #include <algorithm>
 
 namespace elements = cycfi::elements;
@@ -37,9 +38,14 @@ struct startup
          }
       );
 
+      auto resources_path = dir.parent_path() / "Resources";
+
       // Setup the font directory as per VST3 specs:
       // https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html
-      elements::font_paths().push_back(dir.parent_path() / "Resources");
+      elements::font_paths().push_back(resources_path);
+
+      // Add the Resources to our search path
+      elements::add_search_path(resources_path);
    }
 
    static fs::path module_dir()
@@ -60,7 +66,7 @@ struct startup
 
 auto _startup = startup{};
 
-#endif
+#endif // _WIN32
 
 iplug2_plugin::iplug2_plugin(InstanceInfo const& info)
   : iplug2_plugin(info, qplug::make_controller(*this))
