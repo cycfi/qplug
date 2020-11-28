@@ -266,8 +266,6 @@ void iplug2_plugin::begin_edit(int id)
 void iplug2_plugin::edit_parameter(int id, double value)
 {
    SendParameterValueFromUI(id, value);
-   if constexpr(au_api)
-      _controller->on_parameter_change(id, value);
 }
 
 void iplug2_plugin::end_edit(int id)

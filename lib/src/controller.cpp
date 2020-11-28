@@ -206,8 +206,11 @@ namespace cycfi::qplug
 
    void controller::edit_parameter(int id, double value)
    {
-      _base.edit_parameter(id, value);
-      on_edit_parameter(id, value);
+      if (get_parameter_normalized(id) != value) // Avoid double edits
+      {
+         _base.edit_parameter(id, value);
+         on_edit_parameter(id, value);
+      }
    }
 
    void controller::end_edit(int id)
