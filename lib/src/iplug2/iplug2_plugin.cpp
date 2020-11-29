@@ -226,9 +226,12 @@ void iplug2_plugin::register_parameter(int id, qplug::parameter const& param)
 
 void iplug2_plugin::resize_view(elements::extent size)
 {
-   EditorResizeFromUI(size.x, size.y, true);
    if (view())
+   {
+      auto scale = view()->hdpi_scale();
+      EditorResizeFromUI(size.x * scale, size.y * scale, true);
       view()->size(size);
+   }
 }
 
 void iplug2_plugin::set_parameter(int id, double value)
