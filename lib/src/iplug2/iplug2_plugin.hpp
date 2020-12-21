@@ -12,6 +12,7 @@
 #include <qplug/processor.hpp>
 #include <qplug/parameter.hpp>
 #include <memory>
+#include <map>
 
 using namespace iplug;
 namespace elements = cycfi::elements;
@@ -35,6 +36,8 @@ public:
    void                    ProcessBlock(sample** in, sample** out, int frames) override;
    void                    ProcessMidiMsg(const IMidiMsg& msg) override;
    void                    OnParamChange(int id, EParamSource source, int sampleOffset = -1) override;
+   bool                    OnKeyDown(IKeyPress const& key) override;
+   bool                    OnKeyUp(IKeyPress const& key) override;
 
    bool                    SerializeState(IByteChunk& chunk) const override;
    int                     UnserializeState(IByteChunk const& chunk, int start_pos) override;
@@ -56,11 +59,16 @@ public:
 
 private:
 
+   using key_code = elements::key_code;
+   using key_action = elements::key_action;
+   using key_map = std::map<key_code, key_action>;
+
    void                    register_parameter(int id, qplug::parameter const& param);
 
    view_ptr                _view;
    controller_ptr          _controller;
    processor_ptr           _processor;
+   key_map                 _keys = {};
 };
 
 #endif
