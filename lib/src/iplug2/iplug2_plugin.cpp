@@ -565,7 +565,7 @@ namespace
 #if defined(__APPLE__)
          mods |= elements::mod_command | elements::mod_action;
 #else
-         mods |= mod_control | mod_action;
+         mods |= elements::mod_control | elements::mod_action;
 #endif
       if (key.A)
          mods |= elements::mod_alt;
@@ -593,7 +593,8 @@ bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
          auto utf8 = &key.utf8[0];
          auto codepoint = elements::codepoint(utf8);
          int  modifiers = get_mods(key);
-         return _view->text({ codepoint, modifiers }) || handled;
+         if (utf8 != &key.utf8[0])
+            return _view->text({ codepoint, modifiers }) || handled;
       }
       return handled;
    }
