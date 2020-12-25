@@ -36,8 +36,11 @@ public:
    void                    ProcessBlock(sample** in, sample** out, int frames) override;
    void                    ProcessMidiMsg(const IMidiMsg& msg) override;
    void                    OnParamChange(int id, EParamSource source, int sampleOffset = -1) override;
+
+#if defined(VST3_API)
    bool                    OnKeyDown(IKeyPress const& key) override;
    bool                    OnKeyUp(IKeyPress const& key) override;
+#endif
 
    bool                    SerializeState(IByteChunk& chunk) const override;
    int                     UnserializeState(IByteChunk const& chunk, int start_pos) override;

@@ -280,254 +280,149 @@ void iplug2_plugin::OnParamChange(int id, EParamSource source, int /*sampleOffse
    _processor->parameter_change(id, GetParam(id)->Value());
 }
 
+#if defined(VST3_API)
+
 // IKeyPress is used for key press info, such as ASCII representation,
 // virtual key (mapped to Virtual-Key codes) and modifiers. See Virtual-Key
-// Codes:
-// https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-
-// Win32 Virtual Key Codes
-enum win_vk_codes
-{
-   vk_BackSpace = 8,
-   vk_Tab = 9,
-   vk_Return = 13,
-   vk_Shift = 16,
-   vk_Control = 17,
-   vk_Alt = 18,
-   vk_Pause = 19,
-   vk_CapsLock = 20,
-   vk_Escape = 27,
-   vk_Space = 32,
-   vk_PageUp = 33,
-   vk_PageDown = 34,
-   vk_End = 35,
-   vk_Home = 36,
-   vk_Left = 37,
-   vk_Up = 38,
-   vk_Right = 39,
-   vk_Down = 40,
-   vk_PrintScreen = 44,
-   vk_Insert = 45,
-   vk_Delete = 46,
-
-   vk_0 = 48,
-   vk_1 = 49,
-   vk_2 = 50,
-   vk_3 = 51,
-   vk_4 = 52,
-   vk_5 = 53,
-   vk_6 = 54,
-   vk_7 = 55,
-   vk_8 = 56,
-   vk_9 = 57,
-
-   vk_A = 65,
-   vk_B = 66,
-   vk_C = 67,
-   vk_D = 68,
-   vk_E = 69,
-   vk_F = 70,
-   vk_G = 71,
-   vk_H = 72,
-   vk_I = 73,
-   vk_J = 74,
-   vk_K = 75,
-   vk_L = 76,
-   vk_M = 77,
-   vk_N = 78,
-   vk_O = 79,
-   vk_P = 80,
-   vk_Q = 81,
-   vk_R = 82,
-   vk_S = 83,
-   vk_T = 84,
-   vk_U = 85,
-   vk_V = 86,
-   vk_W = 87,
-   vk_X = 88,
-   vk_Y = 89,
-   vk_Z = 90,
-
-   vk_LWin = 91,
-   vk_RWin = 92,
-   vk_Apps = 93,
-
-   vk_NumPad0 = 96,
-   vk_NumPad1 = 97,
-   vk_NumPad2 = 98,
-   vk_NumPad3 = 99,
-   vk_NumPad4 = 100,
-   vk_NumPad5 = 101,
-   vk_NumPad6 = 102,
-   vk_NumPad7 = 103,
-   vk_NumPad8 = 104,
-   vk_NumPad9 = 105,
-
-   vk_Multiply = 106,
-   vk_Add = 107,
-   vk_Subtract = 109,
-   vk_Decimal = 110,
-   vk_Divide = 111,
-
-   vk_F1 = 112,
-   vk_F2 = 113,
-   vk_F3 = 114,
-   vk_F4 = 115,
-   vk_F5 = 116,
-   vk_F6 = 117,
-   vk_F7 = 118,
-   vk_F8 = 119,
-   vk_F9 = 120,
-   vk_F10 = 121,
-   vk_F11 = 122,
-   vk_F12 = 123,
-   vk_F13 = 124,
-   vk_F14 = 125,
-   vk_F15 = 126,
-   vk_F16 = 127,
-
-   vk_NumLock = 144,
-   vk_ScrollLock = 145,
-   vk_LShift = 160,
-   vk_RShift = 161,
-   vk_LControl = 162,
-   vk_RControl = 163,
-   vk_LAlt = 164,
-   vk_RAlt = 165,
-   vk_SemiColon = 186,
-   vk_Equals = 187,
-   vk_Comma = 188,
-   vk_UnderScore = 189,
-   vk_Period = 190,
-   vk_Slash = 191,
-   vk_BackSlash = 220,
-   vk_RightBrace = 221,
-   vk_LeftBrace = 219,
-   vk_Apostrophe = 222
-};
+// Codes: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+// Take note that not all virtual-Key codes are reported back, limited by the
+// switch below.
 
 namespace
 {
    elements::key_code translate_key(IKeyPress const& key)
    {
       using namespace elements;
+
+      if (key.S)
+         return key_code::left_shift;
+      if (key.C)
+         return key_code::left_super;
+      if (key.A)
+         return key_code::left_alt;
+
       switch (key.VK)
       {
-         case vk_BackSpace:               return key_code::backspace;
-         case vk_Tab:                     return key_code::tab;
-         case vk_Return:                  return key_code::enter;
-         case vk_Shift:                   return key_code::left_shift;
-         case vk_Control:                 return key_code::left_control;
-         case vk_Alt:                     return key_code::left_alt;
-         case vk_Pause:                   return key_code::pause;
-         case vk_CapsLock:                return key_code::caps_lock;
-         case vk_Escape:                  return key_code::escape;
-         case vk_Space:                   return key_code::space;
-         case vk_PageUp:                  return key_code::page_up;
-         case vk_PageDown:                return key_code::page_down;
-         case vk_End:                     return key_code::end;
-         case vk_Home:                    return key_code::home;
-         case vk_Left:                    return key_code::left;
-         case vk_Up:                      return key_code::up;
-         case vk_Right:                   return key_code::right;
-         case vk_Down:                    return key_code::down;
-         case vk_PrintScreen:             return key_code::print_screen;
-         case vk_Insert:                  return key_code::insert;
-         case vk_Delete:                  return key_code::_delete;
+         case kVK_NONE:                         return key_code::unknown;
+         case kVK_LBUTTON:                      return key_code::unknown;
+         case kVK_RBUTTON:                      return key_code::unknown;
+         case kVK_MBUTTON:                      return key_code::unknown;
 
-         case vk_0:                       return key_code:: _0;
-         case vk_1:                       return key_code:: _1;
-         case vk_2:                       return key_code:: _2;
-         case vk_3:                       return key_code:: _3;
-         case vk_4:                       return key_code:: _4;
-         case vk_5:                       return key_code:: _5;
-         case vk_6:                       return key_code:: _6;
-         case vk_7:                       return key_code:: _7;
-         case vk_8:                       return key_code:: _8;
-         case vk_9:                       return key_code:: _9;
+         case kVK_BACK:                         return key_code::backspace;
+         case kVK_TAB:                          return key_code::tab;
 
-         case vk_A:                       return key_code::a;
-         case vk_B:                       return key_code::b;
-         case vk_C:                       return key_code::c;
-         case vk_D:                       return key_code::d;
-         case vk_E:                       return key_code::e;
-         case vk_F:                       return key_code::f;
-         case vk_G:                       return key_code::g;
-         case vk_H:                       return key_code::h;
-         case vk_I:                       return key_code::i;
-         case vk_J:                       return key_code::j;
-         case vk_K:                       return key_code::k;
-         case vk_L:                       return key_code::l;
-         case vk_M:                       return key_code::m;
-         case vk_N:                       return key_code::n;
-         case vk_O:                       return key_code::o;
-         case vk_P:                       return key_code::p;
-         case vk_Q:                       return key_code::q;
-         case vk_R:                       return key_code::r;
-         case vk_S:                       return key_code::s;
-         case vk_T:                       return key_code::t;
-         case vk_U:                       return key_code::u;
-         case vk_V:                       return key_code::v;
-         case vk_W:                       return key_code::w;
-         case vk_X:                       return key_code::x;
-         case vk_Y:                       return key_code::y;
-         case vk_Z:                       return key_code::z;
+         case kVK_CLEAR:      /*$$$ fixme $$$*/ return key_code::unknown;
+         case kVK_RETURN:                       return key_code::enter;
 
-         case vk_LWin:                    return key_code::left_super;
-         case vk_RWin:                    return key_code::right_super;
+         case kVK_SHIFT:                        return key_code::left_shift;
+         case kVK_CONTROL:                      return key_code::left_control;
+         case kVK_MENU:                         return key_code::menu;
+         case kVK_PAUSE:                        return key_code::pause;
+         case kVK_CAPITAL:                      key_code::caps_lock;
 
-         case vk_NumPad0:                 return key_code::kp_0;
-         case vk_NumPad1:                 return key_code::kp_1;
-         case vk_NumPad2:                 return key_code::kp_2;
-         case vk_NumPad3:                 return key_code::kp_3;
-         case vk_NumPad4:                 return key_code::kp_4;
-         case vk_NumPad5:                 return key_code::kp_5;
-         case vk_NumPad6:                 return key_code::kp_6;
-         case vk_NumPad7:                 return key_code::kp_7;
-         case vk_NumPad8:                 return key_code::kp_8;
-         case vk_NumPad9:                 return key_code::kp_9;
+         case kVK_ESCAPE:                       return key_code::escape;
 
-         case vk_Multiply:                return key_code::_8;
-         case vk_Add:                     return key_code::equal;
-         case vk_Subtract:                return key_code::minus;
-         case vk_Decimal:                 return key_code::period;
-         case vk_Divide:                  return key_code::slash;
+         case kVK_SPACE:                        return key_code::space;
+         case kVK_PRIOR:                        return key_code::page_up;
+         case kVK_NEXT:                         return key_code::page_down;
+         case kVK_END:                          return key_code::end;
+         case kVK_HOME:                         return key_code::home;
+         case kVK_LEFT:                         return key_code::left;
+         case kVK_UP:                           return key_code::up;
+         case kVK_RIGHT:                        return key_code::right;
+         case kVK_DOWN:                         return key_code::down;
+         case kVK_SELECT:     /*$$$ fixme $$$*/ return key_code::unknown;
+         case kVK_PRINT:      /*$$$ fixme $$$*/ return key_code::unknown;
+         case kVK_SNAPSHOT:                     return key_code::print_screen;
+         case kVK_INSERT:                       return key_code::insert;
+         case kVK_DELETE:                       return key_code::_delete;
+         case kVK_HELP:       /*$$$ fixme $$$*/ return key_code::unknown;
 
-         case vk_F1:                      return key_code::f1;
-         case vk_F2:                      return key_code::f2;
-         case vk_F3:                      return key_code::f3;
-         case vk_F4:                      return key_code::f4;
-         case vk_F5:                      return key_code::f5;
-         case vk_F6:                      return key_code::f6;
-         case vk_F7:                      return key_code::f7;
-         case vk_F8:                      return key_code::f8;
-         case vk_F9:                      return key_code::f9;
-         case vk_F10:                     return key_code::f10;
-         case vk_F11:                     return key_code::f11;
-         case vk_F12:                     return key_code::f12;
-         case vk_F13:                     return key_code::f13;
-         case vk_F14:                     return key_code::f14;
-         case vk_F15:                     return key_code::f15;
-         case vk_F16:                     return key_code::f16;
+         case kVK_0:                            return key_code:: _0;
+         case kVK_1:                            return key_code:: _1;
+         case kVK_2:                            return key_code:: _2;
+         case kVK_3:                            return key_code:: _3;
+         case kVK_4:                            return key_code:: _4;
+         case kVK_5:                            return key_code:: _5;
+         case kVK_6:                            return key_code:: _6;
+         case kVK_7:                            return key_code:: _7;
+         case kVK_8:                            return key_code:: _8;
+         case kVK_9:                            return key_code:: _9;
 
-         case vk_NumLock:                 return key_code::num_lock;
-         case vk_ScrollLock:              return key_code::scroll_lock;
-         case vk_LShift:                  return key_code::left_shift;
-         case vk_RShift:                  return key_code::right_shift;
-         case vk_LControl:                return key_code::left_control;
-         case vk_RControl:                return key_code::right_control;
-         case vk_LAlt:                    return key_code::left_alt;
-         case vk_RAlt:                    return key_code::right_alt;
-         case vk_SemiColon:               return key_code::semicolon;
-         case vk_Equals:                  return key_code::equal;
-         case vk_Comma:                   return key_code::comma;
-         case vk_UnderScore:              return key_code::minus;
-         case vk_Period:                  return key_code::period;
-         case vk_Slash:                   return key_code::slash;
-         case vk_BackSlash:               return key_code::backslash;
-         case vk_RightBrace:              return key_code::left_bracket;
-         case vk_LeftBrace:               return key_code::right_bracket;
-         case vk_Apostrophe:              return key_code::apostrophe;
+         case kVK_A:                            return key_code::a;
+         case kVK_B:                            return key_code::b;
+         case kVK_C:                            return key_code::c;
+         case kVK_D:                            return key_code::d;
+         case kVK_E:                            return key_code::e;
+         case kVK_F:                            return key_code::f;
+         case kVK_G:                            return key_code::g;
+         case kVK_H:                            return key_code::h;
+         case kVK_I:                            return key_code::i;
+         case kVK_J:                            return key_code::j;
+         case kVK_K:                            return key_code::k;
+         case kVK_L:                            return key_code::l;
+         case kVK_M:                            return key_code::m;
+         case kVK_N:                            return key_code::n;
+         case kVK_O:                            return key_code::o;
+         case kVK_P:                            return key_code::p;
+         case kVK_Q:                            return key_code::q;
+         case kVK_R:                            return key_code::r;
+         case kVK_S:                            return key_code::s;
+         case kVK_T:                            return key_code::t;
+         case kVK_U:                            return key_code::u;
+         case kVK_V:                            return key_code::v;
+         case kVK_W:                            return key_code::w;
+         case kVK_X:                            return key_code::x;
+         case kVK_Y:                            return key_code::y;
+         case kVK_Z:                            return key_code::z;
+
+         case kVK_LWIN:                         return key_code::left_super;
+
+         case kVK_NUMPAD0:                      return key_code::kp_0;
+         case kVK_NUMPAD1:                      return key_code::kp_1;
+         case kVK_NUMPAD2:                      return key_code::kp_2;
+         case kVK_NUMPAD3:                      return key_code::kp_3;
+         case kVK_NUMPAD4:                      return key_code::kp_4;
+         case kVK_NUMPAD5:                      return key_code::kp_5;
+         case kVK_NUMPAD6:                      return key_code::kp_6;
+         case kVK_NUMPAD7:                      return key_code::kp_7;
+         case kVK_NUMPAD8:                      return key_code::kp_8;
+         case kVK_NUMPAD9:                      return key_code::kp_9;
+
+         case kVK_MULTIPLY:     /*$$$ ??? $$$*/ return key_code::_8;
+         case kVK_ADD:          /*$$$ ??? $$$*/ return key_code::equal;
+         case kVK_SEPARATOR:                    return key_code::backslash;
+         case kVK_SUBTRACT:     /*$$$ ??? $$$*/ return key_code::minus;
+         case kVK_DECIMAL:                      return key_code::period;
+         case kVK_DIVIDE:                       return key_code::slash;
+
+         case kVK_F1:                           return key_code::f1;
+         case kVK_F2:                           return key_code::f2;
+         case kVK_F3:                           return key_code::f3;
+         case kVK_F4:                           return key_code::f4;
+         case kVK_F5:                           return key_code::f5;
+         case kVK_F6:                           return key_code::f6;
+         case kVK_F7:                           return key_code::f7;
+         case kVK_F8:                           return key_code::f8;
+         case kVK_F9:                           return key_code::f9;
+         case kVK_F10:                          return key_code::f10;
+         case kVK_F11:                          return key_code::f11;
+         case kVK_F12:                          return key_code::f12;
+         case kVK_F13:                          return key_code::f13;
+         case kVK_F14:                          return key_code::f14;
+         case kVK_F15:                          return key_code::f15;
+         case kVK_F16:                          return key_code::f16;
+         case kVK_F17:                          return key_code::f17;
+         case kVK_F18:                          return key_code::f18;
+         case kVK_F19:                          return key_code::f19;
+         case kVK_F20:                          return key_code::f20;
+         case kVK_F21:                          return key_code::f21;
+         case kVK_F22:                          return key_code::f22;
+         case kVK_F23:                          return key_code::f23;
+         case kVK_F24:                          return key_code::f24;
+
+         case kVK_NUMLOCK:                      return key_code::num_lock;
+         case kVK_SCROLL:                       return key_code::scroll_lock;
       }
       return key_code::unknown;
    }
@@ -618,6 +513,8 @@ bool iplug2_plugin::OnKeyUp(const IKeyPress& key)
    }
    return false;
 }
+
+#endif // defined(VST3_API)
 
 namespace
 {
