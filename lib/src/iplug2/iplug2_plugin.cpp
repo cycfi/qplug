@@ -483,13 +483,13 @@ bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
       };
       bool handled = handle_key(*_view, _keys, k);
 
-      if (key.utf8[0])
+      if (!handled && key.utf8[0])
       {
          auto utf8 = &key.utf8[0];
          auto codepoint = elements::codepoint(utf8);
          int  modifiers = get_mods(key);
          if (utf8 != &key.utf8[0])
-            return _view->text({ codepoint, modifiers }) || handled;
+            return _view->text({ codepoint, modifiers });
       }
       return handled;
    }
