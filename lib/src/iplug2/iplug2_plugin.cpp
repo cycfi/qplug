@@ -342,6 +342,8 @@ namespace
          case kVK_DELETE:                       return key_code::_delete;
          case kVK_HELP:       /*$$$ fixme $$$*/ return key_code::unknown;
 
+#endif // __APPLE__
+
          case kVK_0:                            return key_code:: _0;
          case kVK_1:                            return key_code:: _1;
          case kVK_2:                            return key_code:: _2;
@@ -424,8 +426,6 @@ namespace
          case kVK_F22:                          return key_code::f22;
          case kVK_F23:                          return key_code::f23;
          case kVK_F24:                          return key_code::f24;
-
-#endif // __APPLE__
 
          case kVK_NUMLOCK:                      return key_code::num_lock;
          case kVK_SCROLL:                       return key_code::scroll_lock;
