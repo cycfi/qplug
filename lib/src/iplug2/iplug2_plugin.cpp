@@ -466,6 +466,43 @@ namespace
          mods |= elements::mod_alt;
       return mods;
    }
+
+   uint32_t get_codepoint(IKeyPress const& key)
+   {
+#if defined(_WIN32)
+
+      // Win32 version of the VST3 SDK gives wrong results with key.utf8 depending on host.
+      // We do our extraction here, ignorng the information from the VST3 API.
+
+      BYTE kb[256];
+      for (auto i = 0; i < 256; i++)
+         kb[i] = GetKeyState(i);
+      WCHAR uc[12] = {};
+      auto r = ToUnicode(key.VK, MapVirtualKey(key.VK, MAPVK_VK_TO_VSC), kb, uc, 12, 0);
+
+      switch (r)
+      {
+         case -1: // dead key
+         case  0: // no translation
+            return 0;
+
+         default:
+            int size = WideCharToMultiByte(CP_UTF8, 0, uc, 12, nullptr, 0, nullptr, nullptr);
+            std::string utf8(size, 0);
+            WideCharToMultiByte(CP_UTF8, 0, uc, 12, utf8.data(), size, nullptr, nullptr);
+            char const* p = utf8.data();
+            // $$$ JDG: is there a chance that we'll get more than 1 codepoint here? $$$
+            return elements::codepoint(p);
+      }
+      return 0;
+
+#else
+      auto utf8 = &key.utf8[0];
+      auto cp = elements::codepoint(utf8);
+      return (utf8 != &key.utf8[0])? cp : 0;
+
+#endif
+   }
 }
 
 bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
@@ -483,13 +520,14 @@ bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
       };
       bool handled = handle_key(*_view, _keys, k);
 
-      if (!handled && key.utf8[0])
+      if (!handled)
       {
-         auto utf8 = &key.utf8[0];
-         auto codepoint = elements::codepoint(utf8);
-         int  modifiers = get_mods(key);
-         if (utf8 != &key.utf8[0])
-            return _view->text({ codepoint, modifiers });
+         auto cp = get_codepoint(key);
+         if (cp)
+         {
+            int  modifiers = get_mods(key);
+            return _view->text({ cp, modifiers });
+         }
       }
       return handled;
    }
