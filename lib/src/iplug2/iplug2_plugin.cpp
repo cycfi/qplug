@@ -331,6 +331,10 @@ namespace
          case kVK_UP:                           return key_code::up;
          case kVK_RIGHT:                        return key_code::right;
          case kVK_DOWN:                         return key_code::down;
+
+#if !defined(__APPLE__) // On the Mac, we will not send these:
+                        // We'll just let element's base_view to handle them.
+
          case kVK_SELECT:     /*$$$ fixme $$$*/ return key_code::unknown;
          case kVK_PRINT:      /*$$$ fixme $$$*/ return key_code::unknown;
          case kVK_SNAPSHOT:                     return key_code::print_screen;
@@ -421,6 +425,8 @@ namespace
          case kVK_F23:                          return key_code::f23;
          case kVK_F24:                          return key_code::f24;
 
+#endif // __APPLE__
+
          case kVK_NUMLOCK:                      return key_code::num_lock;
          case kVK_SCROLL:                       return key_code::scroll_lock;
       }
@@ -497,10 +503,11 @@ namespace
       return 0;
 
 #else
+      if (key.utf8[0] == 0)
+         return 0;
       auto utf8 = &key.utf8[0];
       auto cp = elements::codepoint(utf8);
       return (utf8 != &key.utf8[0])? cp : 0;
-
 #endif
    }
 }
