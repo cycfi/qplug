@@ -532,6 +532,8 @@ bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
          auto cp = get_codepoint(key);
          if (cp)
          {
+            if (cp < 32 || (cp > 126 && cp < 160))
+               return false;
             int  modifiers = get_mods(key);
             return _view->text({ cp, modifiers });
          }
