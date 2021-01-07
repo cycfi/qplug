@@ -429,6 +429,13 @@ namespace
 
          case kVK_NUMLOCK:                      return key_code::num_lock;
          case kVK_SCROLL:                       return key_code::scroll_lock;
+
+#if defined(_WIN32) // Windows only
+         case VK_OEM_COMMA:                     return key_code::comma;
+         case VK_OEM_MINUS:                     return key_code::minus;
+         case VK_OEM_PERIOD:                    return key_code::period;
+#endif
+
       }
       return key_code::unknown;
    }
@@ -516,16 +523,17 @@ bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
 {
    if (_view)
    {
+      bool handled = false;
       auto code = translate_key(key);
-      if (code == elements::key_code::unknown)
-         return false;
-
-      elements::key_info k = {
-         code
-         , key_action::press
-         , get_mods(key)
-      };
-      bool handled = handle_key(*_view, _keys, k);
+      if (code != elements::key_code::unknown)
+      {
+         elements::key_info k = {
+            code
+            , key_action::press
+            , get_mods(key)
+         };
+         handled = handle_key(*_view, _keys, k);
+      }
 
       if (!handled)
       {
