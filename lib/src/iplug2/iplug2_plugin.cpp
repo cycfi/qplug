@@ -294,13 +294,6 @@ namespace
    {
       using namespace elements;
 
-      if (key.S)
-         return key_code::left_shift;
-      if (key.C)
-         return key_code::left_super;
-      if (key.A)
-         return key_code::left_alt;
-
       switch (key.VK)
       {
          case kVK_NONE:                         return key_code::unknown;
@@ -517,56 +510,53 @@ namespace
       return (utf8 != &key.utf8[0])? cp : 0;
 #endif
    }
+
+   bool process_key(
+      elements::view* _view
+    , IKeyPress const& key
+    , key_action action
+    , std::map<elements::key_code, key_action>& _keys
+   )
+   {
+      if (_view)
+      {
+         bool handled = false;
+         auto code = translate_key(key);
+         if (code != elements::key_code::unknown)
+         {
+            elements::key_info k = {
+               code
+               , action
+               , get_mods(key)
+            };
+            handled = handle_key(*_view, _keys, k);
+         }
+
+         if (!handled && action != elements::key_action::release)
+         {
+            auto cp = get_codepoint(key);
+            if (cp)
+            {
+               if (cp < 32 || (cp > 126 && cp < 160))
+                  return false;
+               int  modifiers = get_mods(key);
+               return _view->text({ cp, modifiers });
+            }
+         }
+         return handled;
+      }
+      return false;
+   }
 }
 
 bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
 {
-   if (_view)
-   {
-      bool handled = false;
-      auto code = translate_key(key);
-      if (code != elements::key_code::unknown)
-      {
-         elements::key_info k = {
-            code
-            , key_action::press
-            , get_mods(key)
-         };
-         handled = handle_key(*_view, _keys, k);
-      }
-
-      if (!handled)
-      {
-         auto cp = get_codepoint(key);
-         if (cp)
-         {
-            if (cp < 32 || (cp > 126 && cp < 160))
-               return false;
-            int  modifiers = get_mods(key);
-            return _view->text({ cp, modifiers });
-         }
-      }
-      return handled;
-   }
-   return false;
+   return process_key(_view.get(), key, key_action::press, _keys);
 }
 
 bool iplug2_plugin::OnKeyUp(const IKeyPress& key)
 {
-   if (_view)
-   {
-      auto code = translate_key(key);
-      if (code == elements::key_code::unknown)
-         return false;
-
-      elements::key_info k = {
-         code
-         , key_action::release
-         , get_mods(key)
-      };
-      return handle_key(*_view, _keys, k);
-   }
-   return false;
+   return process_key(_view.get(), key, key_action::release, _keys);
 }
 
 #endif // defined(VST3_API)
