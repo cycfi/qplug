@@ -294,13 +294,6 @@ namespace
    {
       using namespace elements;
 
-      if (key.S)
-         return key_code::left_shift;
-      if (key.C)
-         return key_code::left_super;
-      if (key.A)
-         return key_code::left_alt;
-
       switch (key.VK)
       {
          case kVK_NONE:                         return key_code::unknown;
@@ -331,12 +324,18 @@ namespace
          case kVK_UP:                           return key_code::up;
          case kVK_RIGHT:                        return key_code::right;
          case kVK_DOWN:                         return key_code::down;
+
+#if !defined(__APPLE__) // On the Mac, we will not send these:
+                        // We'll just let element's base_view to handle them.
+
          case kVK_SELECT:     /*$$$ fixme $$$*/ return key_code::unknown;
          case kVK_PRINT:      /*$$$ fixme $$$*/ return key_code::unknown;
          case kVK_SNAPSHOT:                     return key_code::print_screen;
          case kVK_INSERT:                       return key_code::insert;
          case kVK_DELETE:                       return key_code::_delete;
          case kVK_HELP:       /*$$$ fixme $$$*/ return key_code::unknown;
+
+#endif // __APPLE__
 
          case kVK_0:                            return key_code:: _0;
          case kVK_1:                            return key_code:: _1;
@@ -423,6 +422,13 @@ namespace
 
          case kVK_NUMLOCK:                      return key_code::num_lock;
          case kVK_SCROLL:                       return key_code::scroll_lock;
+
+#if defined(_WIN32) // Windows only
+         case VK_OEM_COMMA:                     return key_code::comma;
+         case VK_OEM_MINUS:                     return key_code::minus;
+         case VK_OEM_PERIOD:                    return key_code::period;
+#endif
+
       }
       return key_code::unknown;
    }
@@ -466,52 +472,91 @@ namespace
          mods |= elements::mod_alt;
       return mods;
    }
+
+   uint32_t get_codepoint(IKeyPress const& key)
+   {
+#if defined(_WIN32)
+
+      // Win32 version of the VST3 SDK gives wrong results with key.utf8 depending on host.
+      // We do our extraction here, ignorng the information from the VST3 API.
+
+      BYTE kb[256];
+      for (auto i = 0; i < 256; i++)
+         kb[i] = GetKeyState(i);
+      WCHAR uc[12] = {};
+      auto r = ToUnicode(key.VK, MapVirtualKey(key.VK, MAPVK_VK_TO_VSC), kb, uc, 12, 0);
+
+      switch (r)
+      {
+         case -1: // dead key
+         case  0: // no translation
+            return 0;
+
+         default:
+            int size = WideCharToMultiByte(CP_UTF8, 0, uc, 12, nullptr, 0, nullptr, nullptr);
+            std::string utf8(size, 0);
+            WideCharToMultiByte(CP_UTF8, 0, uc, 12, utf8.data(), size, nullptr, nullptr);
+            char const* p = utf8.data();
+            // $$$ JDG: is there a chance that we'll get more than 1 codepoint here? $$$
+            return elements::codepoint(p);
+      }
+      return 0;
+
+#else
+      if (key.utf8[0] == 0)
+         return 0;
+      auto utf8 = &key.utf8[0];
+      auto cp = elements::codepoint(utf8);
+      return (utf8 != &key.utf8[0])? cp : 0;
+#endif
+   }
+
+   bool process_key(
+      elements::view* _view
+    , IKeyPress const& key
+    , key_action action
+    , std::map<elements::key_code, key_action>& _keys
+   )
+   {
+      if (_view)
+      {
+         bool handled = false;
+         auto code = translate_key(key);
+         if (code != elements::key_code::unknown)
+         {
+            elements::key_info k = {
+               code
+             , action
+             , get_mods(key)
+            };
+            handled = handle_key(*_view, _keys, k);
+         }
+
+         if (!handled && action != elements::key_action::release)
+         {
+            auto cp = get_codepoint(key);
+            if (cp)
+            {
+               if (cp < 32 || (cp > 126 && cp < 160))
+                  return false;
+               int  modifiers = get_mods(key);
+               return _view->text({ cp, modifiers });
+            }
+         }
+         return handled;
+      }
+      return false;
+   }
 }
 
 bool iplug2_plugin::OnKeyDown(IKeyPress const& key)
 {
-   if (_view)
-   {
-      auto code = translate_key(key);
-      if (code == elements::key_code::unknown)
-         return false;
-
-      elements::key_info k = {
-         code
-         , key_action::press
-         , get_mods(key)
-      };
-      bool handled = handle_key(*_view, _keys, k);
-
-      if (!handled && key.utf8[0])
-      {
-         auto utf8 = &key.utf8[0];
-         auto codepoint = elements::codepoint(utf8);
-         int  modifiers = get_mods(key);
-         if (utf8 != &key.utf8[0])
-            return _view->text({ codepoint, modifiers });
-      }
-      return handled;
-   }
-   return false;
+   return process_key(_view.get(), key, key_action::press, _keys);
 }
 
 bool iplug2_plugin::OnKeyUp(const IKeyPress& key)
 {
-   if (_view)
-   {
-      auto code = translate_key(key);
-      if (code == elements::key_code::unknown)
-         return false;
-
-      elements::key_info k = {
-         code
-         , key_action::release
-         , get_mods(key)
-      };
-      return handle_key(*_view, _keys, k);
-   }
-   return false;
+   return process_key(_view.get(), key, key_action::release, _keys);
 }
 
 #endif // defined(VST3_API)
