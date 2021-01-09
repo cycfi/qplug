@@ -526,8 +526,8 @@ namespace
          {
             elements::key_info k = {
                code
-               , action
-               , get_mods(key)
+             , action
+             , get_mods(key)
             };
             handled = handle_key(*_view, _keys, k);
          }
