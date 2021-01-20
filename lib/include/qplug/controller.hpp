@@ -47,6 +47,8 @@ namespace cycfi::qplug
 
       // Call this when the program wants to change parameter programmatically
       void                    set_parameter(int id, double value);
+
+      // Called when a parameter is set via set_parameter
       virtual void            on_set_parameter(int id, double value) {}
 
       // Called when parameter is being loaded via preset
@@ -60,8 +62,13 @@ namespace cycfi::qplug
       void                    edit_parameter(int id, double value);
       void                    end_edit(int id);
 
+      // Called when the host changes a parameter (e.g. via automaton or external controller)
       virtual void            on_parameter_change(int id, double value) {}
+
+      // Call this when the UI needs to be updated programmatically
       virtual void            update_ui_parameter(int id, double value);
+
+      // Called when the UI is being updated
       virtual void            on_update_ui_parameter(int id, double value) {}
 
       double                  get_parameter(int id) const;
