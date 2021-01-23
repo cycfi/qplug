@@ -719,3 +719,57 @@ bool iplug2_plugin::bypassed() const
    return GetBypassed();
 }
 
+std::string_view iplug2_plugin::host_name() const
+{
+   switch (GetHost())
+   {
+      case kHostUnknown:
+      default:                      return "Unknown";
+
+      case kHostReaper:             return "Reaper";
+      case kHostProTools:           return "Pro Tools";
+      case kHostCubase:             return "Cubase";
+      case kHostNuendo:             return "Nuendo";
+      case kHostSonar:              return "Sonar";
+      case kHostVegas:              return "Vegas";
+      case kHostFL:                 return "FL";
+      case kHostSamplitude:         return "Samplitude";
+      case kHostAbletonLive:        return "Ableton Live";
+      case kHostTracktion:          return "Tracktion";
+      case kHostNTracks:            return "NTracks";
+      case kHostMelodyneStudio:     return "MelodyneStudio";
+      case kHostVSTScanner:         return "VST-Scanner";
+      case kHostAULab:              return "AU Lab";
+      case kHostForte:              return "Forte";
+      case kHostChainer:            return "Chainer";
+      case kHostAudition:           return "Audition";
+      case kHostOrion:              return "Orion";
+      case kHostBias:               return "Bias";
+      case kHostSAWStudio:          return "SAWStudio";
+      case kHostLogic:              return "Logic Pro";
+      case kHostGarageBand:         return "GarageBand";
+      case kHostDigitalPerformer:   return "Digital Performer";
+      case kHostStandalone:         return "Standalone";
+      case kHostAudioMulch:         return "AudioMulch";
+      case kHostStudioOne:          return "Studio One";
+      case kHostVST3TestHost:       return "VST3PlugInTestHost";
+      case kHostArdour:             return "Ardour";
+      case kHostRenoise:            return "Renoise";
+      case kHostOpenMPT:            return "OpenMPT";
+      case kHostWaveLab:            return "WaveLab";
+      case kHostWaveLabElements:    return "WaveLab Elements";
+      case kHostTwistedWave:        return "TwistedWave";
+      case kHostBitwig:             return "Bitwig";
+      case kHostWWW:                return "WWW";
+      case kHostReason:             return "Reason";
+      case kHostGoldWave5x:         return "GoldWave";
+      case kHostWaveform:           return "Waveform";
+      case kHostAudacity:           return "Audacity";
+      case kHostAcoustica:          return "Acoustica";
+      case kHostPluginDoctor:       return "Plugindoctor";
+      case kHostiZotopeRX:          return "iZotope RX";
+      case kHostSAVIHost:           return "SAVIHost";
+      case kHostBlueCat:            return "BlueCat";
+   }
+}
+

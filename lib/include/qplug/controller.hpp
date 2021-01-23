@@ -98,6 +98,8 @@ namespace cycfi::qplug
       void                    receive_midi(MIDIProcessor& proc);
       void                    process_midi(q::midi::raw_message msg, std::size_t time);
 
+      std::string_view        host_name() const;
+
    private:
 
       friend base_controller;

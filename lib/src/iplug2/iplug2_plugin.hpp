@@ -60,6 +60,8 @@ public:
    std::uint32_t           sps() const;
    bool                    bypassed() const;
 
+   std::string_view        host_name() const;
+
 private:
 
    using key_code = elements::key_code;

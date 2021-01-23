@@ -461,4 +461,9 @@ namespace cycfi::qplug
          r.push_back({ name, id });
       return r;
    }
+
+   std::string_view controller::host_name() const
+   {
+      return _base.host_name();
+   }
 }
