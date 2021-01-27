@@ -26,10 +26,26 @@ using base_controller = iplug2_plugin;
 
 namespace cycfi::qplug
 {
+   ////////////////////////////////////////////////////////////////////////////
+   // Plugin version info
+   constexpr static int
+   version()
+   {
+      return PLUG_VERSION_HEX;
+   }
+
+   constexpr static char const*
+   version_str()
+   {
+      return PLUG_VERSION_STR;
+   }
+
+   ////////////////////////////////////////////////////////////////////////////
+   // The controller
+   ////////////////////////////////////////////////////////////////////////////
    class controller
    {
    public:
-
                               controller(base_controller& base);
                               controller(controller const&) = delete;
       virtual                 ~controller();
@@ -90,8 +106,14 @@ namespace cycfi::qplug
       bool                    has_factory_preset(std::string_view name) const;
       preset_names_list       preset_list() const;
 
+      virtual void            on_load_begin(int version) {}
       virtual void            load_state(istream& str) {}
+      virtual void            on_load_end() {}
+
+      virtual void            on_save_begin() {}
       virtual void            save_state(ostream& str) {}
+      virtual void            on_save_end() {}
+
       bool                    is_dirty() const { return _dirty; }
 
                               template <typename MIDIProcessor>

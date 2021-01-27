@@ -606,6 +606,7 @@ bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
 {
    IByteChunk::InitChunkWithIPlugVer(chunk);
    iplug2_ostream str{ chunk };
+   _controller->on_save_begin();
 
    int num_params = mParams.GetSize();
    str << num_params;
@@ -624,6 +625,7 @@ bool iplug2_plugin::SerializeState(IByteChunk& chunk) const
       return false;
    }
 
+   _controller->on_save_end();
    return str._ok;
 }
 
@@ -647,50 +649,35 @@ int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
    auto current_version = GetPluginVersion(false);
    auto version = IByteChunk::GetIPlugVerFromChunk(chunk, start_pos);
 
-   if (version != current_version) // $$$ temporary $$$
+   _controller->on_load_begin(version);
+
+   iplug2_istream str{ chunk, start_pos };
+   int num_params;
+   str >> num_params;
+
+   ENTER_PARAMS_MUTEX
+   for (int i = 0; i < num_params; ++i)
    {
-      auto pos = Plugin::UnserializeState(chunk, start_pos);
-      iplug2_istream str{ chunk, pos };
-      try
-      {
-         _controller->load_state(str);
-      }
-      catch (...)
-      {
-         return false;
-      }
+      std::string name;
+      double value;
+      str >> name >> value;
 
-      return pos + str.offset();
+      auto param = get_param(name, mParams);
+      if (param)
+         param->Set(value);
    }
-   else
+   OnParamReset(kPresetRecall);
+   LEAVE_PARAMS_MUTEX
+
+   try
    {
-      iplug2_istream str{ chunk, start_pos };
-      int num_params;
-      str >> num_params;
-
-      ENTER_PARAMS_MUTEX
-      for (int i = 0; i < num_params; ++i)
-      {
-         std::string name;
-         double value;
-         str >> name >> value;
-
-         auto param = get_param(name, mParams);
-         if (param)
-            param->Set(value);
-      }
-      OnParamReset(kPresetRecall);
-      LEAVE_PARAMS_MUTEX
-
-      try
-      {
-         _controller->load_state(str);
-      }
-      catch (...)
-      {
-         return false;
-      }
+      _controller->load_state(str);
    }
+   catch (...)
+   {
+      return false;
+   }
+   _controller->on_load_end();
    return start_pos;
 }
 
