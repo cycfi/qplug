@@ -113,7 +113,8 @@ namespace cycfi::qplug
    inline void processor::parameters(T&&... param)
    {
       _on_parameter_change.clear();
-      add_parameter(0, std::forward<T>(param)...);
+      if constexpr(sizeof...(T) != 0)
+         add_parameter(0, std::forward<T>(param)...);
    }
 }
 
