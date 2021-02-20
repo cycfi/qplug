@@ -108,10 +108,22 @@ namespace cycfi::qplug
 
    bool load_all_presets(controller::parameter_list params)
    {
-      if (!fs::exists(presets_parent))
-         fs::create_directory(presets_parent);
-      if (!fs::exists(presets_path))
-         fs::create_directory(presets_path);
+      bool no_user_presets = false;
+      try
+      {
+         if (!fs::exists(presets_parent))
+            fs::create_directory(presets_parent);
+         if (!fs::exists(presets_path))
+            fs::create_directory(presets_path);
+      }
+      catch(fs::filesystem_error fe)
+      {
+         no_user_presets = true;
+      }
+      catch(...)
+      {
+         no_user_presets = true;
+      }
 
       // Load factory presets
       if (_factory_presets.empty())
@@ -126,7 +138,7 @@ namespace cycfi::qplug
       }
 
       // Load user presets
-      if (_presets.empty())
+      if (!no_user_presets && _presets.empty())
       {
          preset_info_map loading_presets;
          if (load_all_presets(presets_file, params, loading_presets))
@@ -135,42 +147,55 @@ namespace cycfi::qplug
             _presets.swap(loading_presets);
          }
       }
-      return true;
+
+      return !no_user_presets;
    }
 
-   void save_all_presets(controller::parameter_list params)
+   bool save_all_presets(controller::parameter_list params)
    {
-      if (!fs::exists(presets_path))
-         fs::create_directory(presets_path);
-
-      std::ofstream file(presets_file);
-
-      std::lock_guard<std::mutex> lock(_presets_mutex);
-
-      file << '{';
-      int i = 0;
-      for (auto const& [name, program] : _presets)
+      try
       {
-         file << ((i++ == 0)? "\n" : ",\n");
-         file << "  \"" << name << "\" : {";
-         int j = 0;
-         for (auto const& param : params)
+         if (!fs::exists(presets_path))
+            fs::create_directory(presets_path);
+
+         std::ofstream file(presets_file);
+
+         std::lock_guard<std::mutex> lock(_presets_mutex);
+
+         file << '{';
+         int i = 0;
+         for (auto const& [name, program] : _presets)
          {
-            // Continue if we do not have such a field
-            auto name = param._name;
-            auto iter = program.find(name);
-            if (iter == program.end())
-               continue;
+            file << ((i++ == 0)? "\n" : ",\n");
+            file << "  \"" << name << "\" : {";
+            int j = 0;
+            for (auto const& param : params)
+            {
+               // Continue if we do not have such a field
+               auto name = param._name;
+               auto iter = program.find(name);
+               if (iter == program.end())
+                  continue;
 
-            file << ((j++ == 0)? "\n" : ",\n");
-            file << "    \"" << name << "\" : ";
+               file << ((j++ == 0)? "\n" : ",\n");
+               file << "    \"" << name << "\" : ";
 
-            auto val = iter->second;
-            param.print(file, val);
+               auto val = iter->second;
+               param.print(file, val);
+            }
+            file << "\n  }";
          }
-         file << "\n  }";
+         file << "\n}\n";
       }
-      file << "\n}\n";
+      catch(fs::filesystem_error fe)
+      {
+         return false;
+      }
+      catch(...)
+      {
+         return false;
+      }
+      return true;
    }
 
    controller::controller(base_controller& base)
