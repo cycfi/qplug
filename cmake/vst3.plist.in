@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>${PLUG_NAME} ${PLUG_VERSION_STR} ${PLUG_COPYRIGHT_STR}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.${PLUG_MFR}.vst3.${PLUG_NAME}</string>
+	<string>com.${BUNDLE_MFR}.vst3.${PLUG_NAME}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
