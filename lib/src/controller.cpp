@@ -28,7 +28,8 @@ namespace cycfi::qplug
 
 #if defined(__APPLE__)
    fs::path home = getenv("HOME");
-   fs::path presets_path = home / "Library/Audio/Presets" / PLUG_MFR;
+   fs::path presets_parent = home / "Library/Audio/Presets";
+   fs::path presets_path = home / presets_parent / PLUG_MFR;
    fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
 #endif
 
@@ -107,6 +108,8 @@ namespace cycfi::qplug
 
    bool load_all_presets(controller::parameter_list params)
    {
+      if (!fs::exists(presets_parent))
+         fs::create_directory(presets_parent);
       if (!fs::exists(presets_path))
          fs::create_directory(presets_path);
 
