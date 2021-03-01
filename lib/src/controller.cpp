@@ -29,8 +29,14 @@ namespace cycfi::qplug
 #if defined(__APPLE__)
    fs::path home = getenv("HOME");
    fs::path presets_parent = home / "Library/Audio/Presets";
-   fs::path presets_path = home / presets_parent / PLUG_MFR;
-   fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
+
+   fs::path presets_path()
+   {
+      if (!fs::exists(presets_parent))
+         fs::create_directory(presets_parent);
+      return home / presets_parent / PLUG_MFR;
+   }
+
 #endif
 
 #if defined(_WIN32)
@@ -49,10 +55,17 @@ namespace cycfi::qplug
       }
    }
 
-   fs::path presets_path = get_preset_path();
-   fs::path presets_file = presets_path / PLUG_NAME"_presets.json";
+   fs::path presets_path()
+   {
+      return get_preset_path();
+   }
 
 #endif
+
+   fs::path presets_file()
+   {
+      return presets_path() / PLUG_NAME"_presets.json";
+   }
 
    // Factory presets:
    preset_info_map   _factory_presets;
@@ -111,16 +124,14 @@ namespace cycfi::qplug
       bool no_user_presets = false;
       try
       {
-         if (!fs::exists(presets_parent))
-            fs::create_directory(presets_parent);
-         if (!fs::exists(presets_path))
-            fs::create_directory(presets_path);
+         if (!fs::exists(presets_path()))
+            fs::create_directory(presets_path());
       }
-      catch(fs::filesystem_error fe)
+      catch (fs::filesystem_error fe)
       {
          no_user_presets = true;
       }
-      catch(...)
+      catch (...)
       {
          no_user_presets = true;
       }
@@ -141,7 +152,7 @@ namespace cycfi::qplug
       if (!no_user_presets && _presets.empty())
       {
          preset_info_map loading_presets;
-         if (load_all_presets(presets_file, params, loading_presets))
+         if (load_all_presets(presets_file(), params, loading_presets))
          {
             std::lock_guard<std::mutex> lock(_presets_mutex);
             _presets.swap(loading_presets);
@@ -155,10 +166,10 @@ namespace cycfi::qplug
    {
       try
       {
-         if (!fs::exists(presets_path))
-            fs::create_directory(presets_path);
+         if (!fs::exists(presets_path()))
+            fs::create_directory(presets_path());
 
-         std::ofstream file(presets_file);
+         std::ofstream file(presets_file());
 
          std::lock_guard<std::mutex> lock(_presets_mutex);
 
@@ -187,11 +198,11 @@ namespace cycfi::qplug
          }
          file << "\n}\n";
       }
-      catch(fs::filesystem_error fe)
+      catch (fs::filesystem_error fe)
       {
          return false;
       }
-      catch(...)
+      catch (...)
       {
          return false;
       }
