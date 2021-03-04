@@ -646,7 +646,6 @@ namespace
 
 int iplug2_plugin::UnserializeState(IByteChunk const& chunk, int start_pos)
 {
-   auto current_version = GetPluginVersion(false);
    auto version = IByteChunk::GetIPlugVerFromChunk(chunk, start_pos);
 
    _controller->on_load_begin(version);
