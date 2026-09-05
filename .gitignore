@@ -1,0 +1,56 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+out/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+CMakeUserPresets.json
+Testing/
+compile_commands.json
+
+# Object files and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Plugin bundles
+*.clap
+*.vst3
+*.component
+*.auv3
+
+# Debug symbols
+*.dSYM/
+*.pdb
+*.ilk
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.user
+*.swp
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+.directory
