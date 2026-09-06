@@ -9,7 +9,7 @@
 	url = https://github.com/cycfi/elements.git
 [submodule "lib/clap"]
 	path = lib/clap
-	url = https://github.com/free-audio/clap.git
+	url = https://github.com/cycfi/clap.git
 [submodule "lib/clap-wrapper"]
 	path = lib/clap-wrapper
-	url = https://github.com/free-audio/clap-wrapper.git
+	url = https://github.com/cycfi/clap-wrapper.git
