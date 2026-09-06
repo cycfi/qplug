@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Debug build with validation tests",
+      "description": "All examples, all formats, validators downloaded.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "QPLUG_BUILD_EXAMPLES": "ON",
+        "QPLUG_BUILD_TEST": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release build with validation tests",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}
