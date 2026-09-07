@@ -13,7 +13,7 @@ name: Build
 
 on:
   push:
-    branches: [clap_2026, master]
+    branches: [qplug_2026, master]
   pull_request:
   workflow_dispatch:
 
