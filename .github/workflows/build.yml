@@ -1,0 +1,141 @@
+###############################################################################
+#  Copyright (c) 2019-2026 Joel de Guzman. All rights reserved.
+#
+#  Distributed under the MIT License (https://opensource.org/licenses/MIT)
+###############################################################################
+# Builds the examples on every platform qplug targets. macOS draws with
+# native Quartz2D and also runs the validators; Windows draws with Cairo
+# from vcpkg, and builds only for now, since the validation scripts are
+# shell scripts. The built plugins are uploaded, so a Windows machine can
+# try them without building.
+
+name: Build
+
+on:
+  push:
+    branches: [clap_2026, master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  # Read from Cycfi's vcpkg binary cache so Windows does not rebuild
+  # cairo and its dependency tree on every run. Read only, so this needs
+  # no credentials.
+  VCPKG_BINARY_SOURCES: "clear;http,https://media.cycfi.com/vcpkg-cache/{sha}.zip,read"
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: "macOS Quartz2D"
+          os: macos-latest
+        - name: "Windows Cairo MSVC"
+          os: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Resolve MSVC environment (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        $vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvars64.bat"
+        echo "VCVARS64=$vcvars" >> $env:GITHUB_ENV
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install pkg-config ninja
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: choco install ninja
+      shell: cmd
+
+    - name: Bootstrap vcpkg (Windows)
+      if: runner.os == 'Windows'
+      run: lib\elements\lib\artist\lib\external\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+      shell: cmd
+
+    - name: Configure
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(
+            COMMAND "$ENV{VCVARS64}" && set
+            OUTPUT_FILE environment_script_output.txt)
+          file(STRINGS environment_script_output.txt output_lines)
+          foreach(line IN LISTS output_lines)
+            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+            endif()
+          endforeach()
+        endif()
+
+        set(extra_args "")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          # cairo, harfbuzz and pkgconf come from Artist's vcpkg manifest.
+          # The validation scripts are shell scripts, so tests are off here
+          # until they are ported.
+          set(artist "$ENV{GITHUB_WORKSPACE}/lib/elements/lib/artist")
+          set(vcpkg "${artist}/lib/external/vcpkg/scripts/buildsystems")
+          list(APPEND extra_args
+            -DQPLUG_BUILD_TEST=OFF
+            -DCMAKE_TOOLCHAIN_FILE=${vcpkg}/vcpkg.cmake
+            -DVCPKG_MANIFEST_DIR=${artist})
+        endif()
+
+        execute_process(
+          COMMAND ${CMAKE_COMMAND}
+            -S . -B build
+            -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
+            -G Ninja
+            -D CMAKE_MAKE_PROGRAM=ninja
+            ${extra_args}
+          RESULT_VARIABLE result ERROR_VARIABLE error_message)
+        if (NOT result EQUAL 0)
+          message(FATAL_ERROR "Configure failed: ${error_message} - ${result}")
+        endif()
+
+    - name: Build
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(
+            COMMAND "$ENV{VCVARS64}" && set
+            OUTPUT_FILE environment_script_output.txt)
+          file(STRINGS environment_script_output.txt output_lines)
+          foreach(line IN LISTS output_lines)
+            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+            endif()
+          endforeach()
+        endif()
+
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} --build build --config $ENV{BUILD_TYPE}
+          RESULT_VARIABLE result ERROR_VARIABLE error_message)
+        if (NOT result EQUAL 0)
+          message(FATAL_ERROR "Build failed: ${error_message} - ${result}")
+        endif()
+
+    - name: Test (macOS)
+      if: runner.os == 'macOS'
+      working-directory: build
+      run: ctest --output-on-failure
+
+    - name: Upload the plugins
+      uses: actions/upload-artifact@v4
+      with:
+        name: qplug-${{ runner.os }}
+        path: build/products
+        if-no-files-found: warn
