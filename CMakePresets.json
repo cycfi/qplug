@@ -7,7 +7,7 @@
       "displayName": "Debug build with validation tests",
       "description": "All examples, all formats, validators downloaded.",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/cmake-build-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "QPLUG_BUILD_EXAMPLES": "ON",
@@ -18,7 +18,7 @@
       "name": "release",
       "displayName": "Release build with validation tests",
       "inherits": "default",
-      "binaryDir": "${sourceDir}/build-release",
+      "binaryDir": "${sourceDir}/cmake-build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
