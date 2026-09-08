@@ -1,0 +1,14 @@
+name: qplug
+title: QPlug Audio Plugin Framework
+version: qplug_2026
+start_page: index.adoc
+asciidoc:
+  attributes:
+    source-language: asciidoc@
+    table-caption: false
+    note-caption: ✏️  NOTE
+    tip-caption: 💡  TIP
+    important-caption: 📢  IMPORTANT
+    warning-caption: ⚠️  WARNING
+nav:
+- modules/ROOT/nav.adoc

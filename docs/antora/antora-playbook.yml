@@ -1,0 +1,18 @@
+site:
+  title: QPlug Audio Plugin Framework
+  url: https://www.cycfi.com/
+  start_page: qplug::index.adoc
+content:
+  sources:
+  - url: https://github.com/cycfi/qplug.git
+    branches: [master, v*]
+    start_path: docs
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+antora:
+  extensions:
+  - require: '@antora/lunr-extension'
+output:
+  dir: ./build/site
