@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Introduction :: QPlug Audio Plugin Framework</title>
-    <link rel="canonical" href="https://www.cycfi.com/qplug/qplug_2026/index.html">
+    <title>Architecture :: QPlug Audio Plugin Framework</title>
+    <link rel="canonical" href="https://www.cycfi.com/qplug/v0.1-dev/architecture.html">
     <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../../_/css/site.css">
 <meta name="og:title" content="QPlug Audio Plugin Framework Documentation"/>
@@ -46,12 +46,12 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="qplug" data-version="qplug_2026">
+<div class="nav-container" data-component="qplug" data-version="v0.1-dev">
   <aside class="nav">
     <div class="panels">
       <div class="navbar-item search hide-for-print">
         <div id="search-field" class="field">
-          <input id="search-input" type="text" placeholder="Search the docs" autofocus>
+          <input id="search-input" type="text" placeholder="Search the docs">
         </div>
       </div>
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -61,13 +61,13 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="index.html">Introduction</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="setup.html">Setup and Building</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
 </ul>
@@ -78,14 +78,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">QPlug Audio Plugin Framework</span>
-    <span class="version">qplug_2026</span>
+    <span class="version">v0.1-dev</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <div class="title"><a href="index.html">QPlug Audio Plugin Framework</a></div>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">qplug_2026</a>
+          <a href="index.html">v0.1-dev</a>
         </li>
       </ul>
     </li>
@@ -97,11 +97,11 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="index.html" class="home-link is-current"></a>
+  <a href="index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">QPlug Audio Plugin Framework</a></li>
-    <li><a href="index.html">Introduction</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
   </ul>
 </nav>
 </div>
@@ -110,62 +110,92 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Introduction</h1>
-<div id="preamble">
+<h1 class="page">Architecture</h1>
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a>Overview</h2>
 <div class="sectionbody">
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="📢  IMPORTANT"></i>
-</td>
-<td class="content">
 <div class="paragraph">
-<p>QPlug is in early development. The API changes without notice and nothing
-here is production ready yet.</p>
+<p>A QPlug plugin is composed of three parts, each an ordinary class you
+write.</p>
 </div>
-</td>
-</tr>
-</table>
+<div class="imageblock center">
+<div class="content">
+<img src="_images/qplug/parts.svg" alt="the three parts" width="560px">
 </div>
-<div class="paragraph">
-<p>QPlug is a C&#43;&#43; framework for writing audio plugins. You write the DSP, the
-parameter logic and the user interface as three plain C&#43;&#43; classes; QPlug
-turns them into a native <a href="https://cleveraudio.org">CLAP</a> plugin and, through
-<a href="https://github.com/free-audio/clap-wrapper">clap-wrapper</a>, into VST3 and
-AudioUnit v2 as well, from the one implementation.</p>
 </div>
-<div class="paragraph">
-<p>QPlug is built on two other Cycfi libraries.
-<a href="https://github.com/cycfi/q">Q</a> provides the DSP and the audio-stream
-vocabulary the processor speaks.
-<a href="https://github.com/cycfi/elements">Elements</a> provides the GUI, and its model
-interface is what links controls to parameters.</p>
-</div>
-<div class="paragraph">
-<p>Plugin code contains no CLAP, VST3 or AudioUnit types. The only translation
-unit that knows a plugin format is QPlug&#8217;s own adapter.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">processor</dt>
+<dd>
+<p>The DSP. Runs on the audio thread. Reads the controller&#8217;s
+parameters and processes audio in <code>process(in, out)</code>.</p>
+</dd>
+<dt class="hdlist1">controller</dt>
+<dd>
+<p>The parameters and the logic that relates them, such as
+enabling a group of controls, units, tapering, and wiring between controls.
+Runs on the main thread. It is the hub the other two attach to, and is
+unaware of both.</p>
+</dd>
+<dt class="hdlist1">presenter</dt>
+<dd>
+<p>Builds the user interface and links it to the controller&#8217;s
+parameters. Owns the view, which exists only while the host has an editor
+open.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The library is Open Source and released under the
-<a href="https://opensource.org/licenses/MIT">MIT License</a>.</p>
+<p>The processor and the presenter never see each other. Both reach the
+application&#8217;s state through the controller, which is what keeps the audio
+thread and the user interface independent.</p>
+</div>
+<div class="paragraph">
+<p>Underneath sits <code>base_plugin</code>, the host adapter, whose header is format-free
+and whose implementation lives in one file per format. Today there is one:
+CLAP. VST3 and AudioUnit are produced from that same CLAP implementation by
+clap-wrapper.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_where_to_go_next"><a class="anchor" href="#_where_to_go_next"></a>Where to go next</h2>
+<h2 id="_dependencies"><a class="anchor" href="#_dependencies"></a>Dependencies</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p><a href="setup.html" class="xref page">Setup and Building</a> covers the prerequisites, how to
-build, and how to run the validation tests.</p>
-</li>
-<li>
-<p><a href="architecture.html" class="xref page">Architecture</a> describes the three classes you
-write and how they fit together.</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>All dependencies are git submodules under <code>lib/</code>:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="https://github.com/cycfi/q">q</a></dt>
+<dd>
+<p>DSP</p>
+</dd>
+<dt class="hdlist1"><a href="https://github.com/cycfi/elements">elements</a></dt>
+<dd>
+<p>GUI</p>
+</dd>
+<dt class="hdlist1"><a href="https://github.com/cycfi/infra">infra</a></dt>
+<dd>
+<p>shared utilities</p>
+</dd>
+<dt class="hdlist1"><a href="https://github.com/cycfi/clap">clap</a></dt>
+<dd>
+<p>the CLAP headers</p>
+</dd>
+<dt class="hdlist1"><a href="https://github.com/cycfi/clap-wrapper">clap-wrapper</a></dt>
+<dd>
+<p>VST3 and AUv2</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The last two are Cycfi forks of the upstream projects, so a fix QPlug needs
+can be carried until it is merged. They are used as they come: anything
+QPlug wants from them goes through their extensions, never by editing them.</p>
+</div>
+<div class="paragraph">
+<p>The VST3 and AudioUnit SDKs are downloaded by clap-wrapper at configure
+time.</p>
 </div>
 </div>
 </div>

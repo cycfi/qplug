@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Architecture :: QPlug Audio Plugin Framework</title>
-    <link rel="canonical" href="https://www.cycfi.com/qplug/qplug_2026/architecture.html">
+    <title>Setup and Building :: QPlug Audio Plugin Framework</title>
+    <link rel="canonical" href="https://www.cycfi.com/qplug/v0.1-dev/setup.html">
     <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../../_/css/site.css">
 <meta name="og:title" content="QPlug Audio Plugin Framework Documentation"/>
@@ -46,7 +46,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="qplug" data-version="qplug_2026">
+<div class="nav-container" data-component="qplug" data-version="v0.1-dev">
   <aside class="nav">
     <div class="panels">
       <div class="navbar-item search hide-for-print">
@@ -64,10 +64,10 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="index.html">Introduction</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="setup.html">Setup and Building</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
 </ul>
@@ -78,14 +78,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">QPlug Audio Plugin Framework</span>
-    <span class="version">qplug_2026</span>
+    <span class="version">v0.1-dev</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <div class="title"><a href="index.html">QPlug Audio Plugin Framework</a></div>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">qplug_2026</a>
+          <a href="index.html">v0.1-dev</a>
         </li>
       </ul>
     </li>
@@ -101,7 +101,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">QPlug Audio Plugin Framework</a></li>
-    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="setup.html">Setup and Building</a></li>
   </ul>
 </nav>
 </div>
@@ -110,92 +110,151 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Architecture</h1>
+<h1 class="page">Setup and Building</h1>
 <div class="sect1">
-<h2 id="_overview"><a class="anchor" href="#_overview"></a>Overview</h2>
+<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A QPlug plugin is composed of three parts, each an ordinary class you
-write.</p>
+<p>macOS is the platform exercised most. Windows builds in CI, drawing with
+Cairo through vcpkg. On a fresh Mac you need four things; everything else is
+fetched by CMake at configure time.</p>
 </div>
-<div class="imageblock center">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Xcode Command Line Tools</dt>
+<dd>
+<p><code>xcode-select --install</code>. Provides the C&#43;&#43;20
+compiler, the macOS SDK and frameworks, and git. Xcode 14 or later.</p>
+</dd>
+<dt class="hdlist1">CMake 3.21 or later</dt>
+<dd>
+<p>Ninja as well if you use the presets below; plain
+<code>cmake -B build</code> works with CMake alone.</p>
+</dd>
+<dt class="hdlist1">pkg-config</dt>
+<dd>
+<p><code>brew install pkg-config</code>. Only needed off macOS: a macOS build
+draws with Quartz2D and requires none of it.</p>
+</dd>
+<dt class="hdlist1">Network access at configure time</dt>
+<dd>
+<p>CMake fetches any missing submodules,
+clap-wrapper downloads the VST3 SDK and Apple&#8217;s AudioUnitSDK, and the
+validators the tests need are downloaded, pinned and checksummed, into
+<code>~/.cache/cycfi/qplug-validators</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="📢  IMPORTANT"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Building the VST3 means accepting Steinberg&#8217;s VST3 SDK license, either
+GPLv3 or the proprietary agreement. See clap-wrapper&#8217;s README.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The GUI draws through Artist&#8217;s Quartz2D backend on macOS, which is part of
+the system, so there is no graphics toolchain to install: no Skia, no
+Cairo, and no fontconfig or freetype.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_build_and_test"><a class="anchor" href="#_build_and_test"></a>Build and test</h2>
+<div class="sectionbody">
+<div class="listingblock">
 <div class="content">
-<img src="_images/qplug/parts.svg" alt="the three parts" width="560px">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">git clone https://github.com/cycfi/qplug.git
+cd qplug
+cmake --preset default
+cmake --build cmake-build-debug
+ctest --test-dir cmake-build-debug</code></pre>
 </div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">processor</dt>
-<dd>
-<p>The DSP. Runs on the audio thread. Reads the controller&#8217;s
-parameters and processes audio in <code>process(in, out)</code>.</p>
-</dd>
-<dt class="hdlist1">controller</dt>
-<dd>
-<p>The parameters and the logic that relates them, such as
-enabling a group of controls, units, tapering, and wiring between controls.
-Runs on the main thread. It is the hub the other two attach to, and is
-unaware of both.</p>
-</dd>
-<dt class="hdlist1">presenter</dt>
-<dd>
-<p>Builds the user interface and links it to the controller&#8217;s
-parameters. Owns the view, which exists only while the host has an editor
-open.</p>
-</dd>
-</dl>
 </div>
 <div class="paragraph">
-<p>The processor and the presenter never see each other. Both reach the
-application&#8217;s state through the controller, which is what keeps the audio
-thread and the user interface independent.</p>
+<p>Without Ninja, replace the preset line with
+<code>cmake -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug</code>. A <code>release</code> preset
+builds into <code>cmake-build-release</code>. The directory names are CLion&#8217;s, so the
+IDE and the command line share one build.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="📢  IMPORTANT"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Always run <code>cmake --build</code> before <code>ctest</code>. A reconfigure on its own leaves
+the AUv2 bundle without its <code>AudioComponents</code> entry until the next build, a
+clap-wrapper quirk that QPlug works around at build time. The AU test
+refuses to install such a bundle, and says so.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>Underneath sits <code>base_plugin</code>, the host adapter, whose header is format-free
-and whose implementation lives in one file per format. Today there is one:
-CLAP. VST3 and AudioUnit are produced from that same CLAP implementation by
-clap-wrapper.</p>
+<p>This builds every example into <code>cmake-build-debug/products/</code> in all three
+formats and runs the format validators on them.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_dependencies"><a class="anchor" href="#_dependencies"></a>Dependencies</h2>
+<h2 id="_the_validators"><a class="anchor" href="#_the_validators"></a>The validators</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>All dependencies are git submodules under <code>lib/</code>:</p>
+<p>auval ships with macOS. clap-validator and pluginval are downloaded, pinned
+and checksummed. To use your own installs instead, pass
+<code>-DCLAP_VALIDATOR=&#8230;&#8203;</code> and <code>-DPLUGINVAL=&#8230;&#8203;</code>, or set
+<code>-DQPLUG_DOWNLOAD_VALIDATORS=OFF</code> to have CMake look for installed copies.</p>
+</div>
+<div class="paragraph">
+<p>A validator that cannot be found makes its test skip, not fail.</p>
+</div>
+<div class="paragraph">
+<p>The AU test installs the component into
+<code>~/Library/Audio/Plug-Ins/Components</code> so that auval, and any AU host, can
+see it. It also checks that the system&#8217;s component registry serves the
+version the bundle declares, and clears the registration once if not. A
+rebuilt AU that a host still reads as the old one is otherwise hard to
+recognise, since it looks like a plugin that opens to an empty window.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_examples"><a class="anchor" href="#_the_examples"></a>The examples</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The examples live under <code>examples/</code>.</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><a href="https://github.com/cycfi/q">q</a></dt>
+<dt class="hdlist1">gain</dt>
 <dd>
-<p>DSP</p>
+<p>The smallest: a mono gain with one automatable parameter, a volume
+in decibels, and a fader with a console taper for it.</p>
 </dd>
-<dt class="hdlist1"><a href="https://github.com/cycfi/elements">elements</a></dt>
+<dt class="hdlist1">delay</dt>
 <dd>
-<p>GUI</p>
-</dd>
-<dt class="hdlist1"><a href="https://github.com/cycfi/infra">infra</a></dt>
-<dd>
-<p>shared utilities</p>
-</dd>
-<dt class="hdlist1"><a href="https://github.com/cycfi/clap">clap</a></dt>
-<dd>
-<p>the CLAP headers</p>
-</dd>
-<dt class="hdlist1"><a href="https://github.com/cycfi/clap-wrapper">clap-wrapper</a></dt>
-<dd>
-<p>VST3 and AUv2</p>
+<p>Two parameters, a delay time and a feedback amount, shown on dials
+with labelled marks.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>The last two are Cycfi forks of the upstream projects, so a fix QPlug needs
-can be carried until it is merged. They are used as they come: anything
-QPlug wants from them goes through their extensions, never by editing them.</p>
-</div>
-<div class="paragraph">
-<p>The VST3 and AudioUnit SDKs are downloaded by clap-wrapper at configure
-time.</p>
+<p>A plugin declares one channel layout; a plugin that wants another is
+another plugin. Both examples are mono, so a host offers them on mono
+tracks. On a stereo track, a host such as Logic runs a mono plugin as dual
+mono, one instance per channel.</p>
 </div>
 </div>
 </div>
