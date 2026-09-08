@@ -1,6 +1,6 @@
 name: qplug
 title: QPlug Audio Plugin Framework
-version: qplug_2026
+version: v0.1-dev
 start_page: index.adoc
 asciidoc:
   attributes:
