@@ -1,6 +1,7 @@
 name: qplug
 title: QPlug Audio Plugin Framework
 version: v0.1-dev
+prerelease: true
 start_page: index.adoc
 asciidoc:
   attributes:
