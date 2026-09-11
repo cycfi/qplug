@@ -54,3 +54,8 @@ Desktop.ini
 
 # Linux
 .directory
+
+# Docs
+/docs/antora/build/
+/docs/antora/node_modules/
+/docs/antora/package-lock.json
