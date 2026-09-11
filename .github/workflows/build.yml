@@ -86,15 +86,15 @@ jobs:
 
         set(extra_args "")
         if ("${{ runner.os }}" STREQUAL "Windows")
-          # cairo, harfbuzz and pkgconf come from Artist's vcpkg manifest.
+          # cairo, harfbuzz and pkgconf come from qplug's own vcpkg
+          # manifest, linked statically, with the vcpkg in Artist's tree.
           # The validation scripts are shell scripts, so tests are off here
           # until they are ported.
           set(artist "$ENV{GITHUB_WORKSPACE}/lib/elements/lib/artist")
           set(vcpkg "${artist}/lib/external/vcpkg/scripts/buildsystems")
           list(APPEND extra_args
             -DQPLUG_BUILD_TEST=OFF
-            -DCMAKE_TOOLCHAIN_FILE=${vcpkg}/vcpkg.cmake
-            -DVCPKG_MANIFEST_DIR=${artist})
+            -DCMAKE_TOOLCHAIN_FILE=${vcpkg}/vcpkg.cmake)
         endif()
 
         execute_process(

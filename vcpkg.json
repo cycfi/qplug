@@ -1,0 +1,20 @@
+{
+   "name": "qplug",
+   "version": "0",
+   "dependencies": [
+      {
+         "name": "cairo",
+         "features": ["freetype", "fontconfig"],
+         "platform": "windows"
+      },
+      {
+         "name": "harfbuzz",
+         "platform": "windows"
+      },
+      {
+         "name": "pkgconf",
+         "host": true,
+         "platform": "windows"
+      }
+   ]
+}
