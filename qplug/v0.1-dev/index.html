@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Introduction :: QPlug Audio Plugin Framework</title>
+    <title>QPlug Audio Plugin Framework :: QPlug Audio Plugin Framework</title>
     <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../../_/css/site.css">
 <meta name="og:title" content="QPlug Audio Plugin Framework Documentation"/>
@@ -109,7 +109,7 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Introduction</h1>
+<h1 class="page">QPlug Audio Plugin Framework</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="admonitionblock important">
@@ -127,23 +127,80 @@ here is production ready yet.</p>
 </tr>
 </table>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>QPlug is a C&#43;&#43; framework for writing audio plugins. You write the DSP, the
-parameter logic and the user interface as three plain C&#43;&#43; classes; QPlug
-turns them into a native <a href="https://cleveraudio.org">CLAP</a> plugin and, through
-<a href="https://github.com/free-audio/clap-wrapper">clap-wrapper</a>, into VST3 and
-AudioUnit v2 as well, from the one implementation.</p>
+<p><span class="image left"><img src="_images/qplug.svg" alt="QPlug" width="190"></span>
+QPlug is a C&#43;&#43; framework for writing audio plugins. You write the DSP,
+the parameter logic and the user interface as three plain C&#43;&#43; classes;
+QPlug turns them into a native <a href="https://cleveraudio.org">CLAP</a> plugin and,
+through <a href="https://github.com/free-audio/clap-wrapper">clap-wrapper</a>, into
+VST3 and AudioUnit v2 as well, from the one implementation.</p>
+</div>
+<div class="paragraph">
+<p>That last point is the whole design. A plugin is written once, against
+QPlug&#8217;s own types, and the formats are assembled from it. Plugin code
+contains no CLAP, VST3 or AudioUnit types, no per-format branch and no
+second implementation to keep in step, so the formats cannot drift apart.
+The only translation unit that knows a plugin format is QPlug&#8217;s own
+adapter.</p>
 </div>
 <div class="paragraph">
 <p>QPlug is built on two other Cycfi libraries.
 <a href="https://github.com/cycfi/q">Q</a> provides the DSP and the audio-stream
 vocabulary the processor speaks.
-<a href="https://github.com/cycfi/elements">Elements</a> provides the GUI, and its model
-interface is what links controls to parameters.</p>
+<a href="https://github.com/cycfi/elements">Elements</a> provides the GUI, and its
+model interface is what links controls to parameters.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_a_plugin_looks_like"><a class="anchor" href="#_what_a_plugin_looks_like"></a>What a plugin looks like</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Four functions are all QPlug asks for. It makes the three classes, hands
+each one what it needs, and answers the host on their behalf.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">controller_ptr    make_controller();
+processor_ptr     make_processor(controller&amp; ctl);
+presenter_ptr     make_presenter(controller&amp; ctl);
+
+plugin_info const&amp; info();</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Plugin code contains no CLAP, VST3 or AudioUnit types. The only translation
-unit that knows a plugin format is QPlug&#8217;s own adapter.</p>
+<p>The controller declares the plugin&#8217;s parameters, and nothing else about
+them has to be written. Here is the whole parameter list of the <code>gain</code>
+example, one automatable volume in decibels:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">parameter_list gain_controller::parameters() const
+{
+   static parameter params[] =
+   {
+      parameter{ 1, "Volume", 0_dB }.range(silence.rep, max_volume.rep)
+   };
+
+   return { params };
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From that, the host gets a parameter it can automate and save, the
+processor gets a value it can read on the audio thread without locking,
+and the presenter gets something a fader can bind to.</p>
+</div>
+<div class="paragraph">
+<p>Around this, QPlug supplies what every plugin needs and nobody wants to
+write again: state and presets, the standard header along the top of the
+editor, zoom that survives a reopened session, and a test suite that runs
+the format validators against what you built.</p>
 </div>
 <div class="paragraph">
 <p>The library is Open Source and released under the
@@ -157,14 +214,67 @@ unit that knows a plugin format is QPlug&#8217;s own adapter.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="setup.html" class="xref page">Setup and Building</a> covers the prerequisites, how to
-build, and how to run the validation tests.</p>
+<p><a href="setup.html" class="xref page">Setup and Building</a> covers the prerequisites for macOS
+and Windows, how to build, and how to run the validation tests.</p>
 </li>
 <li>
 <p><a href="architecture.html" class="xref page">Architecture</a> describes the three classes you
-write and how they fit together.</p>
+write, how a parameter reaches both threads, and what the host adapter
+takes care of.</p>
 </li>
 </ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_table_of_contents"><a class="anchor" href="#_table_of_contents"></a>Table of Contents</h2>
+<div class="sectionbody">
+<details>
+<summary class="title">Show Table of Contents</summary>
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#">Introduction</a></p>
+</li>
+<li>
+<p><a href="setup.html" class="xref page">Setup and Building</a></p>
+</li>
+<li>
+<p><a href="architecture.html" class="xref page">Architecture</a></p>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_author"><a class="anchor" href="#_the_author"></a>The Author</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="image right"><img src="_images/joel.jpg" alt="Joel de Guzman" width="150"></span>
+Joel got into electronics and programming in the 80s because almost
+everything in music, his first love, is becoming electronic and digital.
+Since then, he builds his own guitars, effect boxes and synths. He enjoys
+playing distortion-laden rock guitar, composes and produces his own music
+in his home studio.</p>
+</div>
+<div class="paragraph">
+<p>Joel de Guzman is the principal architect and engineer at
+<a href="https://www.cycfi.com/">Cycfi Research</a>. He is a software engineer
+specializing in advanced C&#43;&#43; and an advocate of Open Source. He has
+authored a number of highly successful Open Source projects such as
+<a href="http://tinyurl.com/ydhotlaf">Boost.Spirit</a>,
+<a href="http://tinyurl.com/y6vkeo5t">Boost.Phoenix</a> and
+<a href="http://tinyurl.com/ybn5oq9v">Boost.Fusion</a>. These libraries are all part of
+the <a href="http://tinyurl.com/jubgged">Boost Libraries</a>, a well respected,
+peer-reviewed, Open Source, collaborative development effort.</p>
+</div>
+<hr>
+<div class="paragraph">
+<p><em>Copyright (c) 2019-2026 Joel de Guzman. All rights reserved.</em>
+<em>Distributed under the <a href="https://opensource.org/licenses/MIT">MIT License</a></em></p>
 </div>
 </div>
 </div>

@@ -119,7 +119,7 @@ write.</p>
 </div>
 <div class="imageblock center">
 <div class="content">
-<img src="_images/qplug/parts.svg" alt="the three parts" width="560px">
+<img src="_images/qplug/parts.svg" alt="the three parts" width="520px">
 </div>
 </div>
 <div class="dlist">
@@ -146,14 +146,230 @@ open.</p>
 </div>
 <div class="paragraph">
 <p>The processor and the presenter never see each other. Both reach the
-application&#8217;s state through the controller, which is what keeps the audio
-thread and the user interface independent.</p>
+plugin&#8217;s state through the controller, which is what keeps the audio thread
+and the user interface independent.</p>
 </div>
 <div class="paragraph">
 <p>Underneath sits <code>base_plugin</code>, the host adapter, whose header is format-free
 and whose implementation lives in one file per format. Today there is one:
 CLAP. VST3 and AudioUnit are produced from that same CLAP implementation by
 clap-wrapper.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_parameter_held_twice"><a class="anchor" href="#_a_parameter_held_twice"></a>A Parameter, Held Twice</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A controller declares its parameters and nothing else has to be written:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">parameter_list gain_controller::parameters() const
+{
+   static parameter params[] =
+   {
+      parameter{ 1, "Volume", 0_dB }.range(silence.rep, max_volume.rep)
+   };
+
+   return { params };
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The base holds each declared parameter twice: as an atomic <code>double</code> the
+audio thread reads and writes, and as an Elements <code>value_model&lt;double&gt;</code> a
+control links to. Both are seeded from the parameter&#8217;s initial value. The
+plugin side addresses parameters by their index in the list <code>parameters()</code>
+returns.</p>
+</div>
+<div class="paragraph">
+<p>Holding a parameter twice is what lets the two threads work at their own
+pace. When the host moves a parameter, the value lands in the atomic on the
+audio thread, and the adapter asks the host for a main-thread callback.
+There, <code>update_models</code> assigns the models whose value has actually changed,
+and the GUI follows. Only the changed ones: a model assignment always
+notifies, so assigning all of them would redraw the whole editor on every
+callback, and a value the host echoes back mid-gesture would fight the
+control the user is dragging.</p>
+</div>
+<div class="paragraph">
+<p>The other direction starts in the GUI. A control&#8217;s binding calls
+<code>edit_parameter</code> on the controller, which stores the atomic, sets the model,
+and passes the edit on to the plugin, which queues it for the host. The
+audio thread drains that queue with a <code>try_lock</code> at the top of <code>process</code>, so
+it never blocks; edits it cannot take now go next time.</p>
+</div>
+<div class="paragraph">
+<p>Either side can read a parameter as the type the plugin thinks in rather
+than as a bare <code>double</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">inline gain_controller::decibel gain_controller::volume() const
+{
+   return get_parameter&lt;decibel&gt;(volume_id);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Debug build asserts that the type asked for matches the kind the parameter
+was declared with.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_plugin"><a class="anchor" href="#_the_plugin"></a>The Plugin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>plugin</code> is the one concrete <code>base_plugin</code>. It composes a processor, a
+controller and a presenter, and forwards each host callback to the one that
+owns it: audio and MIDI to the processor, parameters and state to the
+controller, everything about the editor to the presenter.</p>
+</div>
+<div class="paragraph">
+<p>A plugin supplies four functions, and <code>plugin</code> does the rest:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">controller_ptr    make_controller();
+processor_ptr     make_processor(controller&amp; ctl);
+presenter_ptr     make_presenter(controller&amp; ctl);
+
+plugin_info const&amp; info();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The controller is made first, and the other two are handed it. That is the
+only connection between them.</p>
+</div>
+<div class="paragraph">
+<p><code>plugin_info</code> is the plugin&#8217;s identity as the host sees it: its id, name,
+vendor and version, the feature strings that tell a host what kind of
+plugin it is, the size the editor opens with, and a <code>state_version</code> that is
+bumped when what a saved parameter value means changes.</p>
+</div>
+<div class="paragraph">
+<p>A plugin that returns <code>nullptr</code> from <code>make_presenter</code> is headless. It has no
+editor, and the host is told so rather than being offered an empty window.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_host_adapter"><a class="anchor" href="#_the_host_adapter"></a>The Host Adapter</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>base_plugin</code> is where a plugin format is met, and its header names no
+format type. Every host call arrives as a plain virtual: <code>activate</code>,
+<code>process</code>, <code>midi</code>, <code>get_parameter</code>, <code>save_state</code>, <code>attach_view</code>. Everything
+the plugin sends out goes the other way through four members:
+<code>begin_edit</code>, <code>edit_parameter</code>, <code>end_edit</code> and <code>request_view_resize</code>.</p>
+</div>
+<div class="paragraph">
+<p>One translation unit implements those members for one format. Today that is
+<code>lib/src/clap/base_plugin.cpp</code>, the only file that knows CLAP. Besides
+forwarding, it does the work that would otherwise be spread through every
+plugin:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Parameter ids.</strong> Hosts address parameters by id. The plugin side
+addresses them by index. The adapter translates both ways, so a plugin
+never keeps a lookup table of its own.</p>
+</li>
+<li>
+<p><strong>Events at the sample they belong to.</strong> A host&#8217;s events carry the frame
+they happen at. The adapter cuts the block where they fall and calls
+<code>process</code> once per piece, each with the parameters and notes that were in
+force for it. A processor sees a run of shorter blocks, never a block plus
+a pile of timestamps to reconcile.</p>
+</li>
+<li>
+<p><strong>MIDI dialects.</strong> Notes arrive as the host chose to send them. A processor
+writes MIDI 1.0 overloads and hears every dialect, MIDI 2.0 among them.</p>
+</li>
+<li>
+<p><strong>State.</strong> The host&#8217;s stream is wrapped as a <code>qplug::ostream</code> or
+<code>istream</code>, two virtuals wide, so the controller writes its JSON into
+whatever the format hands it.</p>
+</li>
+<li>
+<p><strong>What the host is offered at all.</strong> A note port only for a processor that
+says it wants notes, an editor only for a plugin that has a presenter.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_one_implementation_three_formats"><a class="anchor" href="#_one_implementation_three_formats"></a>One Implementation, Three Formats</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A plugin&#8217;s own code and the QPlug adapter it links are built into one static
+library. clap-wrapper assembles that library into a CLAP, a VST3 and an
+AudioUnit v2 module, recompiling one small entry shim per format so that
+each binary exports the entry point under the name its format looks for.</p>
+</div>
+<div class="paragraph">
+<p>The same code runs in all three. There is no per-format branch in a plugin
+and no second implementation to keep in step, which is why the formats
+cannot drift apart.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_lives_where"><a class="anchor" href="#_what_lives_where"></a>What Lives Where</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>gain</code>, the smallest example, is a mono volume control with one automatable
+parameter. Its whole source is four pairs of files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">examples/gain
+  ├─ gain_processor.hpp/.cpp    <i class="conum" data-value="1"></i><b>(1)</b>
+  ├─ gain_controller.hpp/.cpp   <i class="conum" data-value="2"></i><b>(2)</b>
+  ├─ gain_presenter.hpp/.cpp    <i class="conum" data-value="3"></i><b>(3)</b>
+  └─ gain.cpp                   <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Derives from <code>qplug::processor</code>. Declares its channel layout and
+multiplies the input by a smoothed gain.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Derives from <code>qplug::controller</code>. Declares the one parameter and reads
+it back as a <code>decibel</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Derives from <code>qplug::presenter</code>. Builds a fader in <code>on_attach</code> and
+binds it to the parameter.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The four functions above.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Everything else comes from the library. The processor inherits Q&#8217;s
+audio-stream vocabulary, so <code>process(in, out)</code> takes the same
+<code>multi_buffer</code> channels a Q program works with. The controller&#8217;s base holds
+the parameters, writes and reads the state as JSON, and keeps factory and
+user presets. The presenter&#8217;s base owns the view, carries the gestures an
+edit is bracketed with, and builds the header along the top of the editor,
+with the main menu, the preset the plugin is on and the zoom buttons, all of
+it already wired through the controller.</p>
+</div>
+<div class="paragraph">
+<p>A plugin&#8217;s code contains no CLAP, VST3 or AudioUnit type, and no thread
+synchronisation of its own.</p>
 </div>
 </div>
 </div>
