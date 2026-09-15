@@ -4,8 +4,8 @@
 #  Distributed under the MIT License (https://opensource.org/licenses/MIT)
 ###############################################################################
 # Builds the examples on every platform qplug targets. macOS draws with
-# native Quartz2D and also runs the validators; Windows draws with Cairo
-# from vcpkg, and builds only for now, since the validation scripts are
+# native Quartz2D and also runs the validators; Windows draws with
+# Direct2D, and builds only for now, since the validation scripts are
 # shell scripts. The built plugins are uploaded, so a Windows machine can
 # try them without building.
 
@@ -22,10 +22,6 @@ on:
 
 env:
   BUILD_TYPE: Release
-  # Read from Cycfi's vcpkg binary cache so Windows does not rebuild
-  # cairo and its dependency tree on every run. Read only, so this needs
-  # no credentials.
-  VCPKG_BINARY_SOURCES: "clear;http,https://media.cycfi.com/vcpkg-cache/{sha}.zip,read"
 
 jobs:
   build:
@@ -37,7 +33,7 @@ jobs:
         config:
         - name: "macOS Quartz2D"
           os: macos-latest
-        - name: "Windows Cairo MSVC"
+        - name: "Windows Direct2D MSVC"
           os: windows-latest
 
     steps:
@@ -64,11 +60,6 @@ jobs:
       run: choco install ninja
       shell: cmd
 
-    - name: Bootstrap vcpkg (Windows)
-      if: runner.os == 'Windows'
-      run: lib\elements\lib\artist\lib\external\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-      shell: cmd
-
     - name: Configure
       shell: cmake -P {0}
       run: |
@@ -86,15 +77,9 @@ jobs:
 
         set(extra_args "")
         if ("${{ runner.os }}" STREQUAL "Windows")
-          # cairo, harfbuzz and pkgconf come from qplug's own vcpkg
-          # manifest, linked statically, with the vcpkg in Artist's tree.
           # The validation scripts are shell scripts, so tests are off here
           # until they are ported.
-          set(artist "$ENV{GITHUB_WORKSPACE}/lib/elements/lib/artist")
-          set(vcpkg "${artist}/lib/external/vcpkg/scripts/buildsystems")
-          list(APPEND extra_args
-            -DQPLUG_BUILD_TEST=OFF
-            -DCMAKE_TOOLCHAIN_FILE=${vcpkg}/vcpkg.cmake)
+          list(APPEND extra_args -DQPLUG_BUILD_TEST=OFF)
         endif()
 
         execute_process(
