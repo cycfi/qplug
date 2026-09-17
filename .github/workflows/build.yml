@@ -6,8 +6,9 @@
 # Builds the examples on every platform qplug targets. macOS draws with
 # native Quartz2D and also runs the validators; Windows draws with
 # Direct2D, and builds only for now, since the validation scripts are
-# shell scripts. The built plugins are uploaded, so a Windows machine can
-# try them without building.
+# shell scripts; Linux draws with Cairo into an X11 window, and builds
+# only because a runner has no display for the editor tests. The built
+# plugins are uploaded, so a machine can try them without building.
 
 name: Build
 
@@ -35,6 +36,8 @@ jobs:
           os: macos-latest
         - name: "Windows Direct2D MSVC"
           os: windows-latest
+        - name: "Linux Cairo X11 GCC"
+          os: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -60,6 +63,26 @@ jobs:
       run: choco install ninja
       shell: cmd
 
+    # Cairo and its text stack for Artist, X11 and its cursor and monitor
+    # extensions for Elements' host, and ALSA for the standalone app's
+    # audio and MIDI through RtAudio and RtMidi.
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libcairo2-dev \
+          libfontconfig1-dev \
+          libfreetype6-dev \
+          libharfbuzz-dev \
+          libwebp-dev \
+          libx11-dev \
+          libxcursor-dev \
+          libxrandr-dev \
+          libasound2-dev \
+          pkg-config \
+          ninja-build
+
     - name: Configure
       shell: cmake -P {0}
       run: |
@@ -79,6 +102,9 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           # The validation scripts are shell scripts, so tests are off here
           # until they are ported.
+          list(APPEND extra_args -DQPLUG_BUILD_TEST=OFF)
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          # pluginval opens each editor, and a runner has no display.
           list(APPEND extra_args -DQPLUG_BUILD_TEST=OFF)
         endif()
 
