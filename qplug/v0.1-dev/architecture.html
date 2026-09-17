@@ -79,6 +79,9 @@
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="reference/processor.html">Processor</a>
   </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/midi.html">MIDI</a>
+  </li>
 </ul>
   </li>
 </ul>
@@ -299,7 +302,8 @@ a pile of timestamps to reconcile.</p>
 </li>
 <li>
 <p><strong>MIDI dialects.</strong> Notes arrive as the host chose to send them. A processor
-writes MIDI 1.0 overloads and hears every dialect, MIDI 2.0 among them.</p>
+writes MIDI 2.0 overloads and receives every dialect, MIDI 1.0 and CLAP&#8217;s
+own notes widened to it.</p>
 </li>
 <li>
 <p><strong>State.</strong> The host&#8217;s stream is wrapped as a <code>qplug::ostream</code> or

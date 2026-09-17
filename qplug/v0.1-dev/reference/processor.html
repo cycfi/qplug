@@ -79,6 +79,9 @@
   <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link" href="processor.html">Processor</a>
   </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="midi.html">MIDI</a>
+  </li>
 </ul>
   </li>
 </ul>
@@ -206,8 +209,8 @@ interface.</p>
 <dt class="hdlist1">Formats and dialects</dt>
 <dd>
 <p>The same processor runs as a CLAP, a VST3 and an
-AudioUnit. A <code>midi_processor</code> receives MIDI in MIDI 1.0 terms whether the
-host sent MIDI 1.0, MIDI 2.0 or CLAP&#8217;s own note events.</p>
+AudioUnit. A <code>midi_processor</code> receives MIDI as MIDI 2.0 messages whether
+the host sent MIDI 1.0, MIDI 2.0 or CLAP&#8217;s own note events.</p>
 </dd>
 </dl>
 </div>
@@ -582,26 +585,24 @@ only this one, so an instrument overrides it too and leaves <code>in</code> unre
 </table>
 <div class="paragraph">
 <p>A processor that takes MIDI does not override these. It derives from
-<code>midi_processor</code>, which does, and hands every message to Q overloads in
-MIDI 1.0 terms, whichever dialect the host sent.</p>
+<a href="midi.html" class="xref page">MIDI</a>, which does, and hands every message to Q overloads as MIDI 2.0,
+whichever dialect the host sent.</p>
 </div>
 <div class="paragraph">
 <p>This is how MIDI is sample accurate without a processor scheduling anything.
 The adapter calls <code>midi</code> at the cut for the message&#8217;s frame, as
 <a href="#_events_at_the_sample">Events at the Sample</a> describes, and the next call to <code>process</code> starts on
 that frame. A processor acts on a message as soon as it arrives. The
-<code>va_synth_1</code> example starts a voice when a note on comes in, and ignores
+<code>va_synth_1</code> example starts a voice when a note-on comes in, and ignores
 <code>time</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">void va_synth_processor::operator()(midi::note_on msg, std::size_t)
 {
-   // A note on of zero velocity is a note off, by MIDI 1.0 convention.
-   if (msg.velocity() == 0)
-      note_off(msg.key());
-   else
-      note_on(msg.key(), float(msg.velocity()) / 127);
+   // Sixteen bits. A MIDI 1.0 note on of zero velocity never gets here:
+   // the translation makes it the note off MIDI 1.0 means by it.
+   note_on(msg.key(), float(msg.velocity()) / 65535);
 }</code></pre>
 </div>
 </div>
@@ -609,7 +610,7 @@ that frame. A processor acts on a message as soon as it arrives. The
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">void va_synth_processor::note_on(std::uint8_t key, float velocity)
 {
-   allocate(key).on(midi::note_frequency(key), sensed(velocity));
+   allocate(key).on(q::midi_1_0::note_frequency(key), sensed(velocity));
 }</code></pre>
 </div>
 </div>
