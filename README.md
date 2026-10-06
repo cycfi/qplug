@@ -3,11 +3,8 @@
 > **Moved.** QPlug is now part of [Q](https://github.com/cycfi/q), as the
 > `q_plug` component, with its full history. Build it with
 > `-DQ_BUILD_PLUG=ON`; see the
-> [QPlug docs](https://cycfi.github.io/q/q/v1.5-dev/q_plug/index.html). This
+> [QPlug docs](https://cycfi.github.io/q/q/v1.5/q_plug/index.html). This
 > repository is archived.
-
-> **Draft.** QPlug is in early development on the `qplug_2026` branch. The
-> API changes without notice and nothing here is production ready yet.
 
 ## Introduction
 
