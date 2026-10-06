@@ -67,6 +67,9 @@
     <a class="nav-link" href="setup.html">Setup and Building</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="testing.html">Testing and Validation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -77,10 +80,22 @@
     <a class="nav-link" href="reference/parameter.html">Parameters</a>
   </li>
   <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/controller.html">Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="reference/processor.html">Processor</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="reference/midi.html">MIDI</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/presenter.html">Presenter</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/header.html">The Header</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="reference/zoom.html">Zoom and Display Scale</a>
   </li>
 </ul>
   </li>
@@ -230,7 +245,11 @@ the format validators against what you built.</p>
 <ul>
 <li>
 <p><a href="setup.html" class="xref page">Setup and Building</a> covers the prerequisites for macOS
-and Windows, how to build, and how to run the validation tests.</p>
+and Windows, and how to build.</p>
+</li>
+<li>
+<p><a href="testing.html" class="xref page">Testing and Validation</a> covers the unit tests, the
+tests that drive a whole plugin, and the format validators.</p>
 </li>
 <li>
 <p><a href="architecture.html" class="xref page">Architecture</a> describes the three classes you
@@ -241,10 +260,18 @@ takes care of.</p>
 <p>The reference describes each part in full:
 <a href="reference/parameter.html" class="xref page">Parameters</a>, declaring a parameter and
 what the host is told about it,
+<a href="reference/controller.html" class="xref page">Controller</a>, the parameter values, the
+state and the presets,
 <a href="reference/processor.html" class="xref page">Processor</a>, the DSP and how the host&#8217;s
-events reach it at the sample they belong to, and
+events reach it at the sample they belong to,
 <a href="reference/midi.html" class="xref page">MIDI</a>, how a processor receives MIDI in every
-dialect a host sends.</p>
+dialect a host sends, and
+<a href="reference/presenter.html" class="xref page">Presenter</a>, building the editor and
+binding its controls to the parameters, and
+<a href="reference/header.html" class="xref page">The Header</a>, the row along the top of every
+editor and how a plugin adds to it, and
+<a href="reference/zoom.html" class="xref page">Zoom and Display Scale</a>, sizing the editor and
+what a size means to the host.</p>
 </li>
 </ul>
 </div>
@@ -265,6 +292,9 @@ dialect a host sends.</p>
 <p><a href="setup.html" class="xref page">Setup and Building</a></p>
 </li>
 <li>
+<p><a href="testing.html" class="xref page">Testing and Validation</a></p>
+</li>
+<li>
 <p><a href="architecture.html" class="xref page">Architecture</a></p>
 </li>
 <li>
@@ -275,10 +305,22 @@ dialect a host sends.</p>
 <p><a href="reference/parameter.html" class="xref page">Parameters</a></p>
 </li>
 <li>
+<p><a href="reference/controller.html" class="xref page">Controller</a></p>
+</li>
+<li>
 <p><a href="reference/processor.html" class="xref page">Processor</a></p>
 </li>
 <li>
 <p><a href="reference/midi.html" class="xref page">MIDI</a></p>
+</li>
+<li>
+<p><a href="reference/presenter.html" class="xref page">Presenter</a></p>
+</li>
+<li>
+<p><a href="reference/header.html" class="xref page">The Header</a></p>
+</li>
+<li>
+<p><a href="reference/zoom.html" class="xref page">Zoom and Display Scale</a></p>
 </li>
 </ul>
 </div>

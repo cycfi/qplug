@@ -67,6 +67,9 @@
     <a class="nav-link" href="../setup.html">Setup and Building</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../testing.html">Testing and Validation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -77,10 +80,22 @@
     <a class="nav-link" href="parameter.html">Parameters</a>
   </li>
   <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="controller.html">Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="processor.html">Processor</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link" href="midi.html">MIDI</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="presenter.html">Presenter</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="header.html">The Header</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="zoom.html">Zoom and Display Scale</a>
   </li>
 </ul>
   </li>
@@ -543,8 +558,8 @@ case:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-c++ hljs" data-lang="c++">void va_synth_processor::operator()(midi::note_on msg, std::size_t)
 {
-   // Sixteen bits. A MIDI 1.0 note on of zero velocity never gets here:
-   // the translation makes it the note off MIDI 1.0 means by it.
+   // Sixteen bits. A MIDI 1.0 note-on of zero velocity never gets here:
+   // the translation makes it the note-off MIDI 1.0 means by it.
    note_on(msg.key(), float(msg.velocity()) / 65535);
 }</code></pre>
 </div>

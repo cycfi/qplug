@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Untitled :: QPlug Audio Plugin Framework</title>
+    <title>Tutorials :: QPlug Audio Plugin Framework</title>
     <meta name="generator" content="Antora 3.1.15">
-    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/site.css">
 <meta name="og:title" content="QPlug Audio Plugin Framework Documentation"/>
 <link rel="icon" type="image/png" sizes="16x16" href="https://cycfi.com/assets/icons/favicon-16x16.png"/>
 <link rel="icon" type="image/png" sizes="32x32" href="https://cycfi.com/assets/icons/favicon-32x32.png"/>
@@ -56,46 +56,46 @@
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
     <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
-    <h3 class="title"><a href="index.html">QPlug Audio Plugin Framework</a></h3>
+    <h3 class="title"><a href="../index.html">QPlug Audio Plugin Framework</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="index.html">Introduction</a>
+    <a class="nav-link" href="../index.html">Introduction</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="setup.html">Setup and Building</a>
+    <a class="nav-link" href="../setup.html">Setup and Building</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="testing.html">Testing and Validation</a>
+    <a class="nav-link" href="../testing.html">Testing and Validation</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="architecture.html">Architecture</a>
+    <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <span class="nav-text">Reference</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/parameter.html">Parameters</a>
+    <a class="nav-link" href="../reference/parameter.html">Parameters</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/controller.html">Controller</a>
+    <a class="nav-link" href="../reference/controller.html">Controller</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/processor.html">Processor</a>
+    <a class="nav-link" href="../reference/processor.html">Processor</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/midi.html">MIDI</a>
+    <a class="nav-link" href="../reference/midi.html">MIDI</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/presenter.html">Presenter</a>
+    <a class="nav-link" href="../reference/presenter.html">Presenter</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/header.html">The Header</a>
+    <a class="nav-link" href="../reference/header.html">The Header</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reference/zoom.html">Zoom and Display Scale</a>
+    <a class="nav-link" href="../reference/zoom.html">Zoom and Display Scale</a>
   </li>
 </ul>
   </li>
@@ -111,10 +111,10 @@
   </div>
   <ul class="components">
     <li class="component is-current">
-      <div class="title"><a href="index.html">QPlug Audio Plugin Framework</a></div>
+      <div class="title"><a href="../index.html">QPlug Audio Plugin Framework</a></div>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">v0.1-dev</a>
+          <a href="../index.html">v0.1-dev</a>
         </li>
       </ul>
     </li>
@@ -126,8 +126,12 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="index.html" class="home-link"></a>
+  <a href="../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">QPlug Audio Plugin Framework</a></li>
+    <li><a href="index.html">Tutorials</a></li>
+  </ul>
 </nav>
 </div>
   <div class="content">
@@ -135,7 +139,78 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-
+<h1 class="page">Tutorials</h1>
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a>Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These tutorials walk through the examples that come with QPlug, from the
+simplest to the most involved. Each one is a complete plugin in its own
+directory under <code>examples/</code>, built in every format its platform has, and
+each page quotes the example&#8217;s own code.</p>
+</div>
+<div class="paragraph">
+<p>Every example has the same shape: the three parts described in
+<a href="../architecture.html" class="xref page">Architecture</a>, each a header and a source file, the file that makes them,
+and the build.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">examples/&lt;name&gt;/
+   CMakeLists.txt         the implementation library and the formats
+   &lt;name&gt;_processor.hpp   the DSP
+   &lt;name&gt;_processor.cpp
+   &lt;name&gt;_controller.hpp  the parameters
+   &lt;name&gt;_controller.cpp
+   &lt;name&gt;_presenter.hpp   the editor
+   &lt;name&gt;_presenter.cpp
+   &lt;name&gt;.cpp             make_controller, make_processor, make_presenter
+                          and info
+   resources/             the images the editor draws, when it has any</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The examples are built with everything else (see <a href="../setup.html" class="xref page">Setup and Building</a>), and every one
+lands in <code>cmake-build-debug/products/</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">cmake --preset default
+cmake --build cmake-build-debug</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_path"><a class="anchor" href="#_the_path"></a>The Path</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Start with <a href="gain.html" class="xref page">Your First Plugin: Gain</a>. It has one parameter, and every piece a plugin
+is made of appears in it once.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Tutorial</th>
+<th class="tableblock halign-left valign-top">What it demonstrates</th>
+<th class="tableblock halign-left valign-top">Key parts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="gain.html" class="xref page">Your First Plugin: Gain</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A mono gain with one automatable volume and a console fader for it</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>processor</code>, <code>controller</code>, <code>presenter</code>, <code>parameter</code>, <code>plugin_info</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </article>
   </div>
 </main>
@@ -144,10 +219,10 @@
   <p>This page was built using the Antora default UI.</p>
   <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
 </footer>
-<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
-<script async src="../../_/js/vendor/highlight.js"></script>
-<script src="../../_/js/vendor/lunr.js"></script>
-<script src="../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" data-stylesheet="../../_/css/search.css"></script>
-<script async src="../../search-index.js"></script>
+<script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/vendor/lunr.js"></script>
+<script src="../../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" data-stylesheet="../../../_/css/search.css"></script>
+<script async src="../../../search-index.js"></script>
   </body>
 </html>

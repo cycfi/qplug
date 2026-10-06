@@ -67,6 +67,9 @@
     <a class="nav-link" href="../setup.html">Setup and Building</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../testing.html">Testing and Validation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -77,10 +80,22 @@
     <a class="nav-link" href="parameter.html">Parameters</a>
   </li>
   <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="controller.html">Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="processor.html">Processor</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="midi.html">MIDI</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="presenter.html">Presenter</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="header.html">The Header</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="zoom.html">Zoom and Display Scale</a>
   </li>
 </ul>
   </li>
@@ -132,7 +147,7 @@
 <div class="paragraph">
 <p>A <code>parameter</code> declares one of a plugin&#8217;s parameters as the host sees it:
 its id, its name, its kind, its range, its initial value, and how the host
-is to treat it. A controller declares all of its parameters in one static
+is to treat it. A <a href="controller.html" class="xref page">controller</a> declares all of its parameters in one static
 array and returns it from <code>parameters()</code>. This is the whole list of the
 <code>delay</code> example:</p>
 </div>
@@ -394,7 +409,7 @@ from. <code>range</code> replaces that with the plugin&#8217;s own.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>parameter{id, name, k}</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A MIDI note, kind <code>note</code>, from A0 (21)
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <a href="midi.html" class="xref page">MIDI</a> note, kind <code>note</code>, from A0 (21)
                                      to G9 (127).</p></td>
 </tr>
 <tr>
@@ -652,7 +667,7 @@ preset the plugin wrote leaves it at the value it has.
 </tbody>
 </table>
 <div class="paragraph">
-<p>A presenter reads what it needs from the parameter itself, such as the
+<p>A <a href="presenter.html" class="xref page">presenter</a> reads what it needs from the parameter itself, such as the
 range for a scale. The <code>gain</code> example builds its fader&#8217;s scale this way:</p>
 </div>
 <div class="listingblock">
@@ -699,7 +714,7 @@ names.</p>
 </table>
 <div class="paragraph">
 <p>The two are inverses, and they are how a control and a parameter meet. A
-presenter&#8217;s <code>bind</code> takes a mapping with <code>position</code> and <code>value</code>, and a
+<a href="presenter.html" class="xref page">presenter</a>'s <code>bind</code> takes a mapping with <code>position</code> and <code>value</code>, and a
 parameter is one, as in the <code>delay</code> example:</p>
 </div>
 <div class="listingblock">
@@ -866,9 +881,9 @@ has its own form:</p>
 <h3 id="_traits"><a class="anchor" href="#_traits"></a>Traits</h3>
 <div class="paragraph">
 <p><code>parameter_traits&lt;T&gt;</code> carries a value between the <code>double</code> a parameter
-holds and the type the plugin thinks in. The controller&#8217;s
+holds and the type the plugin thinks in. The <a href="controller.html" class="xref page">controller</a>'s
 <code>get_parameter&lt;T&gt;</code>, <code>set_parameter&lt;T&gt;</code> and <code>edit_parameter&lt;T&gt;</code> go through
-it, so a processor can read a <code>q::decibel</code> rather than a bare number. A
+it, so a <a href="processor.html" class="xref page">processor</a> can read a <code>q::decibel</code> rather than a bare number. A
 Debug build asserts that <code>T</code> matches the parameter&#8217;s kind.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
